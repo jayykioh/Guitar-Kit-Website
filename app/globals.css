@@ -1,26 +1,173 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+    /* Modern Minimalist - Light Mode */
+    --bg-page: #ffffff;
+    --bg-surface: #ffffff;
+    --bg-surface-hover: #f9fafb;
+    /* Gray-50 */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+    --text-primary: #111827;
+    /* Gray-900 */
+    --text-secondary: #6b7280;
+    /* Gray-500 */
+    --text-tertiary: #9ca3af;
+    /* Gray-400 */
+
+    --border-subtle: #e5e7eb;
+    /* Gray-200 */
+    --border-strong: #d1d5db;
+    /* Gray-300 */
+
+    --accent-primary: #7c3aed;
+    /* Violet-600 */
+    --accent-surface: #f5f3ff;
+    /* Violet-50 */
+
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+
+    --fretboard-bg: #f3f4f6;
+    /* Gray-100 */
+    --fretboard-fret: #d1d5db;
+    --string-color: #9ca3af;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+    :root {
+        /* Modern Minimalist - Dark Mode */
+        --bg-page: #000000;
+        --bg-surface: #0a0a0a;
+        --bg-surface-hover: #171717;
+
+        --text-primary: #ededed;
+        --text-secondary: #a1a1aa;
+        /* Zinc-400 */
+        --text-tertiary: #52525b;
+        /* Zinc-600 */
+
+        --border-subtle: #27272a;
+        /* Zinc-800 */
+        --border-strong: #3f3f46;
+        /* Zinc-700 */
+
+        --accent-primary: #8b5cf6;
+        /* Violet-500 */
+        --accent-surface: #1e1b4b;
+        /* Violet-950 */
+
+        --fretboard-bg: #111111;
+        --fretboard-fret: #333333;
+        --string-color: #444444;
+    }
+}
+
+@theme inline {
+    --color-bg-page: var(--bg-page);
+    --color-bg-surface: var(--bg-surface);
+    --color-bg-surface-hover: var(--bg-surface-hover);
+
+    --color-text-primary: var(--text-primary);
+    --color-text-secondary: var(--text-secondary);
+    --color-text-tertiary: var(--text-tertiary);
+
+    --color-border-subtle: var(--border-subtle);
+    --color-border-strong: var(--border-strong);
+
+    --color-accent-primary: var(--accent-primary);
+    --color-accent-surface: var(--accent-surface);
+
+    --color-fretboard-bg: var(--fretboard-bg);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Minimalist Utilities */
+.min-panel {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+}
+
+.min-select {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    transition: all 0.2s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+}
+
+.min-select:hover {
+    border-color: var(--border-strong);
+    background-color: var(--bg-surface-hover);
+}
+
+.min-select:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px var(--accent-surface);
+}
+
+.min-btn {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.min-btn:hover {
+    background: var(--bg-surface-hover);
+    border-color: var(--border-strong);
+}
+
+.min-btn-primary {
+    background: var(--text-primary);
+    color: var(--bg-page);
+    border: 1px solid transparent;
+}
+
+.min-btn-primary:hover {
+    opacity: 0.9;
+}
+
+/* Glassmorphism & Dashboard Utilities (Sprint 2 Refinement) */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(229, 231, 235, 0.5);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    width: 100%;
+}
+
+@media (prefers-color-scheme: dark) {
+    .glass-panel {
+        background: rgba(17, 17, 17, 0.7);
+        border: 1px solid rgba(63, 63, 70, 0.5);
+    }
 }

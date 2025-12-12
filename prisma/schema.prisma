@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Scale definitions - Major, Minor, Pentatonic, Modes, etc.
+model Scale {
+  id          String     @id @default(cuid())
+  name        String     @unique // "Major", "Minor Pentatonic", "Dorian"
+  intervals   Int[]      // [0, 2, 4, 5, 7, 9, 11] for Major scale
+  formula     String     // "W-W-H-W-W-W-H" display formula
+  category    String     // "Major", "Minor", "Pentatonic", "Modal", "Exotic"
+  description String?    // Optional description
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  favorites   Favorite[]
+}
+
+// Guitar tuning configurations
+model Tuning {
+  id         String   @id @default(cuid())
+  name       String   @unique // "Standard", "Drop D", "Open G"
+  notes      String[] // ["E", "A", "D", "G", "B", "E"] from low to high
+  isStandard Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// User accounts (prepared for NextAuth in Sprint 3)
+model User {
+  id        String     @id @default(cuid())
+  email     String     @unique
+  name      String?
+  image     String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  favorites Favorite[]
+  earTrainingResults EarTrainingResult[]
+}
+
+// User saved favorite scales
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scaleId   String
+  scale     Scale    @relation(fields: [scaleId], references: [id], onDelete: Cascade)
+  key       String   // Root note: "A", "C#", "Eb", etc.
+  tuningId  String   // Reference to tuning
+  notes     String?  // Optional user notes
+  createdAt DateTime @default(now())
+
+  @@unique([userId, scaleId, key, tuningId])
+  @@index([userId])
+}
+
+// Ear training results (Sprint 3)
+model EarTrainingResult {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise  String   // "note", "interval", "chord"
+  score     Int      // Correct answers count
+  total     Int      // Total questions
+  accuracy  Float    // Percentage
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
