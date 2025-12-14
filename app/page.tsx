@@ -1,18 +1,21 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { getScale, getScaleById } from '@/lib/music/scales';
+import { motion, Variants } from 'framer-motion';
+import { getScale, getScaleById, getAllScales } from '@/lib/music/scales';
 import { getTuningById, mapScaleToFretboard } from '@/lib/music/fretboard';
 import { ALL_PATTERNS, getPatternById } from '@/lib/music/patterns';
 import { calculatePatternPosition } from '@/lib/music/patterns/logic';
 import type { NoteName } from '@/types/music';
 
+import MusicPlayer from '@/components/player/MusicPlayer';
+import MetronomeControl from '@/components/metronome/MetronomeControl';
+
 // Components
 import Fretboard from '@/components/fretboard/Fretboard';
-import ScaleSelector from '@/components/selectors/ScaleSelector';
-import KeySelector from '@/components/selectors/KeySelector';
-import TuningSelector from '@/components/selectors/TuningSelector';
+import AnimatedDropdown from '@/components/ui/AnimatedDropdown';
+
+const KEYS: NoteName[] = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
 export default function Home() {
   const [selectedScale, setSelectedScale] = useState('minor-pentatonic');
@@ -21,6 +24,18 @@ export default function Home() {
   const [selectedPatternId, setSelectedPatternId] = useState<string>('');
   const [showIntervals, setShowIntervals] = useState(true);
 
+  // Data for Dropdowns
+  const keyOptions = KEYS.map(k => ({ value: k, label: k }));
+  const scaleOptions = getAllScales().map(s => ({ value: s.id, label: s.name }));
+  const patternOptions = [
+    { value: '', label: 'Show Full Fretboard', group: 'Default' },
+    ...ALL_PATTERNS.map(p => ({
+      value: p.id,
+      label: p.name,
+      group: p.type === 'pentatonic' ? 'Pentatonic Boxes' : 'CAGED System'
+    }))
+  ];
+
   // Logic to cycle patterns
   const handlePatternCycle = (direction: 'prev' | 'next') => {
     const pentatonicPatterns = ALL_PATTERNS.filter(p => p.type === 'pentatonic');
@@ -28,7 +43,7 @@ export default function Home() {
 
     let nextIndex = 0;
     if (currentIndex === -1) {
-      nextIndex = 0; // Default to first if none selected
+      nextIndex = (currentIndex + 1) % pentatonicPatterns.length;
     } else {
       if (direction === 'next') {
         nextIndex = (currentIndex + 1) % pentatonicPatterns.length;
@@ -63,11 +78,11 @@ export default function Home() {
   }, [selectedScale, selectedKey, selectedTuning, selectedPatternId]);
 
   // Animation Variants
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.1 } }
   };
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 10, filter: 'blur(5px)' },
     visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.5, ease: "easeOut" } }
   };
@@ -77,95 +92,126 @@ export default function Home() {
   return (
     <motion.div
       initial="hidden" animate="visible" variants={containerVariants}
-      className="min-h-screen p-4 md:p-8 flex flex-col items-center gap-8 font-sans bg-bg-page transition-colors duration-200"
+      className="min-h-screen p-4 md:p-6 flex flex-col items-center gap-6 font-sans bg-bg-page transition-colors duration-200"
     >
 
-      {/* 
-        TOP CONTROLS (Dashboard)
-        - Compact Grid Layout
-        - Glassmorphism Panel
-       */}
-      <motion.header variants={itemVariants} className="w-full max-w-7xl flex flex-col items-center gap-6 z-10">
+      {/*
+        UNIFIED DASHBOARD CONTAINER
+        - Max Width 1400px (matches fretboard)
+        - 2 Main Columns: [Hero Controls(60%)] | [Backing Track(40%)]
+      */}
+      <motion.header variants={itemVariants} className="w-full max-w-[1400px] z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
 
-        {/* Title & Info */}
-        <div className="text-center space-y-1">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-text-primary">
-            Guitar Scale Explorer
-          </h1>
-          <p className="text-sm text-text-secondary">
-            {activePattern ? `Viewing ${patternDefinition?.name} in ${selectedKey} ${scaleInfo?.name}` : `${selectedKey} ${scaleInfo?.name} - Full Neck`}
-          </p>
-        </div>
+        {/* LEFT: HERO & CONTROLS (Cols 1-8) */}
+        <div className="lg:col-span-8 glass-panel p-6 flex flex-col justify-between shadow-sm relative group">
 
-        {/* The Dashboard Panel */}
-        <div className="glass-panel p-4 md:p-6 w-full flex flex-col gap-4">
-
-          {/* Row 1: Primary Selectors */}
-          <div className="dashboard-grid">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider pl-1">Key</label>
-              <KeySelector selectedKey={selectedKey} onKeyChange={setSelectedKey} />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider pl-1">Scale</label>
-              <ScaleSelector selectedScale={selectedScale} onScaleChange={setSelectedScale} />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider pl-1">Tuning</label>
-              <TuningSelector selectedTuning={selectedTuning} onTuningChange={setSelectedTuning} />
-            </div>
-
-            {/* Pattern Controls - Integrated into Grid */}
-            <div className="flex flex-col gap-1.5 min-w-[240px]">
-              <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider pl-1">Pattern Sequence</label>
-              <div className="flex gap-2 w-full">
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => handlePatternCycle('prev')} className="min-btn px-3 flex-shrink-0" aria-label="Previous">←</motion.button>
-                <div className="relative flex-grow">
-                  <select
-                    value={selectedPatternId}
-                    onChange={(e) => setSelectedPatternId(e.target.value)}
-                    className="min-select w-full appearance-none cursor-pointer text-ellipsis overflow-hidden whitespace-nowrap"
-                  >
-                    <option value="">Show Full Fretboard</option>
-                    <optgroup label="Pentatonic Boxes">
-                      {ALL_PATTERNS.filter(p => p.type === 'pentatonic').map(p => (
-                        <option key={p.id} value={p.id}>{p.name}</option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="CAGED System">
-                      {ALL_PATTERNS.filter(p => p.type === 'caged').map(p => (
-                        <option key={p.id} value={p.id}>{p.name}</option>
-                      ))}
-                    </optgroup>
-                  </select>
-                </div>
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => handlePatternCycle('next')} className="min-btn px-3 flex-shrink-0" aria-label="Next">→</motion.button>
-              </div>
-            </div>
+          {/* Artistic Background Layer (Clipped) */}
+          <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-accent-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-accent-primary/10 transition-colors duration-500"></div>
           </div>
 
-          {/* Row 2: View Toggles (Optional Refinements) */}
-          <div className="flex justify-end pt-2 border-t border-border-subtle mt-2">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              onClick={() => setShowIntervals(!showIntervals)}
-              className="text-xs font-semibold text-accent-primary hover:text-accent-secondary transition-colors"
+          {/* HERO TYPOGRAPHY: Scale Name */}
+          <div className="mb-6 relative z-10">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              key={`${selectedKey}-${selectedScale}`} // Re-animate on change
+              className="flex flex-col"
             >
-              {showIntervals ? 'Mode: Intervals (1, 3, 5)' : 'Mode: Note Names (A, C, E)'}
-            </motion.button>
+              <div className="flex items-baseline gap-3">
+                <h1 className="text-5xl md:text-6xl font-black tracking-tight text-text-primary">
+                  {selectedKey}
+                </h1>
+                <span className="text-3xl md:text-4xl font-light text-text-secondary">
+                  {scaleInfo?.name}
+                </span>
+              </div>
+              <p className="text-lg font-medium text-accent-primary mt-1 flex items-center gap-2">
+                {activePattern
+                  ? <span className="bg-accent-surface px-2 py-0.5 rounded text-accent-primary text-sm uppercase tracking-wide font-bold">{patternDefinition?.name}</span>
+                  : <span className="text-text-tertiary">Full Fretboard View</span>
+                }
+              </p>
+            </motion.div>
+          </div>
+
+          {/* CONTROLS ROW */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-border-subtle/50 pt-5 relative z-20">
+            {/* Key & Scale */}
+            <div className="flex gap-4">
+              <AnimatedDropdown
+                label="Key"
+                value={selectedKey}
+                options={keyOptions}
+                onChange={(v) => setSelectedKey(v as NoteName)}
+                className="w-24 flex-shrink-0"
+              />
+              <AnimatedDropdown
+                label="Scale"
+                value={selectedScale}
+                options={scaleOptions}
+                onChange={setSelectedScale}
+                className="flex-grow"
+              />
+            </div>
+
+            {/* Pattern Selector */}
+            <div className="flex gap-2 items-end">
+              <motion.button
+                whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                onClick={() => handlePatternCycle('prev')}
+                className="min-btn px-3 h-[42px] mb-[1px]" aria-label="Previous"
+              >
+                ←
+              </motion.button>
+              <AnimatedDropdown
+                label="Pattern"
+                value={selectedPatternId}
+                options={patternOptions}
+                onChange={setSelectedPatternId}
+                className="flex-grow"
+              />
+              <motion.button
+                whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                onClick={() => handlePatternCycle('next')}
+                className="min-btn px-3 h-[42px] mb-[1px]" aria-label="Next"
+              >
+                →
+              </motion.button>
+            </div>
+
+            {/* Toggles */}
+            <div className="flex items-end justify-end md:justify-center pb-2 gap-3">
+              <MetronomeControl />
+
+              <motion.button
+                whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                onClick={() => setShowIntervals(!showIntervals)}
+                className="text-xs font-bold px-4 py-2 rounded-full bg-bg-surface border border-border-subtle text-text-secondary hover:text-accent-primary hover:border-accent-primary transition-colors"
+              >
+                {showIntervals ? 'Showing Intervals' : 'Showing Notes'}
+              </motion.button>
+            </div>
           </div>
         </div>
+
+        {/* RIGHT: MUSIC PLAYER (Cols 9-12) */}
+        <div className="lg:col-span-4 glass-panel p-6 shadow-sm flex flex-col justify-center">
+          <MusicPlayer />
+        </div>
+
       </motion.header>
 
-      {/* 
-        MAIN HERO AREA: Fretboard 
-        - Centered
-        - Max Width
-        - Shadow/Depth
+      {/*
+        MAIN HERO AREA: Fretboard
+        - Width matches dashboard (1400px)
+        - Seamless visual continuation
       */}
-      <motion.main variants={itemVariants} className="w-full flex-grow flex flex-col items-center justify-start pb-32"> {/* Large padding bottom for future player */}
+      <motion.main variants={itemVariants} className="w-full max-w-[1400px] flex-grow flex flex-col pb-32">
+        <div className="w-full overflow-x-auto rounded-xl shadow-lg border border-border-subtle bg-fretboard-bg relative">
+          {/* Decorative top accent */}
+          <div className="w-full h-1 bg-gradient-to-r from-transparent via-accent-primary/20 to-transparent absolute top-0 left-0"></div>
 
-        <div className="w-full max-w-[1400px] overflow-x-auto rounded-2xl shadow-2xl border border-border-subtle bg-fretboard-bg">
           <div className="min-w-[900px] lg:min-w-full p-4 md:p-8">
             <Fretboard
               fretNotes={fretNotes}
@@ -177,9 +223,7 @@ export default function Home() {
             />
           </div>
         </div>
-
       </motion.main>
-
     </motion.div>
   );
 }

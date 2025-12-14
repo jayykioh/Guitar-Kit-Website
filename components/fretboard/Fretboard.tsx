@@ -25,7 +25,7 @@ export default function Fretboard({
     const width = 1200;
     const height = 300;
     const paddingX = 50;
-    const paddingY = 40;
+    const paddingY = 40; // Kept consistent, we'll draw numbers below the last string
 
     // Standard styling for Sprint 1
     const fretWidth = (width - paddingX * 2) / (fretCount + 1);
@@ -45,19 +45,40 @@ export default function Fretboard({
 
     return (
         <svg
-            viewBox={`0 0 ${width} ${height}`}
+            viewBox={`0 0 ${width} ${height + 30}`} // Added vertical space for fret numbers
             className="w-full h-auto block select-none"
-            style={{ overflow: 'visible' }} // Allow shadows/markers to bleed if needed
+            style={{ overflow: 'visible' }}
         >
             <defs>
-                {/* Subtle shadow filter for depth */}
                 <filter id="fret-shadow" x="-50%" y="-50%" width="200%" height="200%">
                     <feDropShadow dx="0" dy="2" stdDeviation="2" floodOpacity="0.3" />
                 </filter>
             </defs>
 
-            {/* Board Background - Clean Flat */}
+            {/* Board Background */}
             <rect x="0" y="0" width={width} height={height} fill="var(--fretboard-bg)" rx="10" ry="10" />
+
+            {/* Fret Numbers - Dynamic rendering */}
+            {Array.from({ length: fretCount }).map((_, i) => {
+                const fretNum = i + 1;
+                // Only show certain numbers to avoid clutter? Or all? User asked for aligned under low E string which is bottom.
+                // Standard: 3, 5, 7, 9, 12, 15... or just all labels. Let's do standard markers for clarity + specific labels.
+                // Request: "Add fret numbers at the bottom... aligned under the low E string."
+                return (
+                    <text
+                        key={`fret-num-${fretNum}`}
+                        x={calculateX(fretNum)}
+                        y={height + 25} // Below the board
+                        textAnchor="middle"
+                        fill="var(--text-tertiary)"
+                        fontSize="12"
+                        fontWeight="600"
+                        fontFamily="Inter, sans-serif"
+                    >
+                        {fretNum}
+                    </text>
+                );
+            })}
 
             {/* Frets - Thin Lines */}
             {/* Nut */}
