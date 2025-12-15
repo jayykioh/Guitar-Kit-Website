@@ -1,64 +1,68 @@
 @import "tailwindcss";
 
 :root {
-    /* Modern Minimalist - Light Mode */
-    --bg-page: #ffffff;
+    /* Professional Neutral - Light Mode */
+    --bg-page: #f8fafc;
+    /* Slate-50 */
     --bg-surface: #ffffff;
-    --bg-surface-hover: #f9fafb;
-    /* Gray-50 */
+    --bg-surface-hover: #f1f5f9;
+    /* Slate-100 */
 
-    --text-primary: #111827;
-    /* Gray-900 */
-    --text-secondary: #6b7280;
-    /* Gray-500 */
-    --text-tertiary: #9ca3af;
-    /* Gray-400 */
+    --text-primary: #0f172a;
+    /* Slate-900 */
+    --text-secondary: #475569;
+    /* Slate-600 */
+    --text-tertiary: #94a3b8;
+    /* Slate-400 */
 
-    --border-subtle: #e5e7eb;
-    /* Gray-200 */
-    --border-strong: #d1d5db;
-    /* Gray-300 */
+    --border-subtle: #e2e8f0;
+    /* Slate-200 */
+    --border-strong: #cbd5e1;
+    /* Slate-300 */
 
-    --accent-primary: #7c3aed;
-    /* Violet-600 */
-    --accent-surface: #f5f3ff;
-    /* Violet-50 */
+    /* Refined Emerald Accent - Professional & Modern */
+    --accent-primary: #10b981;
+    /* Emerald-500 */
+    --accent-surface: #ecfdf5;
+    /* Emerald-50 */
 
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06);
+    --glow-accent: 0 0 20px rgba(16, 185, 129, 0.3);
+    /* Soft Glow */
 
-    --fretboard-bg: #f3f4f6;
-    /* Gray-100 */
-    --fretboard-fret: #d1d5db;
-    --string-color: #9ca3af;
+    --fretboard-bg: #e2e8f0;
+    /* Slate-200 */
+    --fretboard-fret: #94a3b8;
+    /* Slate-400 */
+    --string-color: #64748b;
+    /* Slate-500 */
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
-        /* Modern Minimalist - Dark Mode */
+        /* Professional Neutral - Dark Mode */
         --bg-page: #000000;
-        --bg-surface: #0a0a0a;
-        --bg-surface-hover: #171717;
+        /* Pure Black for maximum contrast (Spotify style) */
+        --bg-surface: #121212;
+        /* Spotify Surface */
+        --bg-surface-hover: #2a2a2a;
 
-        --text-primary: #ededed;
-        --text-secondary: #a1a1aa;
-        /* Zinc-400 */
-        --text-tertiary: #52525b;
-        /* Zinc-600 */
+        --text-primary: #ffffff;
+        --text-secondary: #b3b3b3;
+        --text-tertiary: #a7a7a7;
 
-        --border-subtle: #27272a;
-        /* Zinc-800 */
-        --border-strong: #3f3f46;
-        /* Zinc-700 */
+        --border-subtle: #282828;
+        --border-strong: #404040;
 
-        --accent-primary: #8b5cf6;
-        /* Violet-500 */
-        --accent-surface: #1e1b4b;
-        /* Violet-950 */
+        --accent-primary: #1DB954;
+        /* Exact Spotify Green */
+        --accent-surface: #14592D;
+        /* Darker Green background */
 
-        --fretboard-bg: #111111;
-        --fretboard-fret: #333333;
-        --string-color: #444444;
+        --fretboard-bg: #121212;
+        --fretboard-fret: #404040;
+        --string-color: #555555;
     }
 }
 
@@ -78,6 +82,8 @@
     --color-accent-surface: var(--accent-surface);
 
     --color-fretboard-bg: var(--fretboard-bg);
+
+    --shadow-glow: var(--glow-accent);
 }
 
 body {
@@ -146,6 +152,52 @@ body {
 
 .min-btn-primary:hover {
     opacity: 0.9;
+}
+
+/* Unified Control Button Style */
+.control-btn {
+    height: 40px;
+    /* Consistent height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1rem;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.75rem;
+    /* rounded-xl */
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    /* text-sm */
+    font-weight: 600;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    user-select: none;
+}
+
+.control-btn:hover {
+    background-color: var(--bg-surface-hover);
+    color: var(--text-primary);
+    border-color: var(--border-strong);
+    transform: translateY(-1px);
+}
+
+.control-btn:active {
+    transform: translateY(0);
+}
+
+.control-btn.active {
+    background-color: var(--bg-surface);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+    box-shadow: 0 0 0 1px var(--accent-primary) inset;
+    /* Subtle inner ring */
+}
+
+/* Icon-only variation */
+.control-btn-icon {
+    padding: 0;
+    width: 40px;
 }
 
 /* Glassmorphism & Dashboard Utilities (Sprint 2 Refinement) */

@@ -136,60 +136,77 @@ export default function Home() {
           </div>
 
           {/* CONTROLS ROW */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-border-subtle/50 pt-5 relative z-20">
-            {/* Key & Scale */}
-            <div className="flex gap-4">
+          {/* CONTROLS ROW */}
+          <div className="flex flex-wrap items-end gap-x-6 gap-y-4 border-t border-border-subtle/50 pt-5 relative z-20">
+
+            {/* Group 1: Key & Scale (Flexible Grow) */}
+            <div className="flex-1 min-w-[200px] flex gap-3">
               <AnimatedDropdown
                 label="Key"
                 value={selectedKey}
                 options={keyOptions}
                 onChange={(v) => setSelectedKey(v as NoteName)}
-                className="w-24 flex-shrink-0"
+                className="w-[25%] min-w-[80px]" // Flexible width
               />
               <AnimatedDropdown
                 label="Scale"
                 value={selectedScale}
                 options={scaleOptions}
                 onChange={setSelectedScale}
-                className="flex-grow"
+                className="flex-grow" // Takes remaining space
               />
             </div>
 
-            {/* Pattern Selector */}
-            <div className="flex gap-2 items-end">
+            {/* Group 2: Pattern (Flexible Grow, slightly larger base) */}
+            <div className="flex-1 min-w-[240px] flex gap-2 items-end">
               <motion.button
-                whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.05, borderColor: 'var(--border-strong)' }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => handlePatternCycle('prev')}
-                className="min-btn px-3 h-[42px] mb-[1px]" aria-label="Previous"
+                className="w-10 h-[40px] flex items-center justify-center rounded-xl bg-bg-surface border border-border-subtle text-text-secondary hover:text-accent-primary transition-all shadow-sm"
+                aria-label="Previous"
               >
-                ←
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
               </motion.button>
-              <AnimatedDropdown
-                label="Pattern"
-                value={selectedPatternId}
-                options={patternOptions}
-                onChange={setSelectedPatternId}
-                className="flex-grow"
-              />
+
+              <div className="flex-grow">
+                <AnimatedDropdown
+                  label="Pattern"
+                  value={selectedPatternId}
+                  options={patternOptions}
+                  onChange={setSelectedPatternId}
+                  className="w-full"
+                />
+              </div>
+
               <motion.button
-                whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.05, borderColor: 'var(--border-strong)' }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => handlePatternCycle('next')}
-                className="min-btn px-3 h-[42px] mb-[1px]" aria-label="Next"
+                className="w-10 h-[40px] flex items-center justify-center rounded-xl bg-bg-surface border border-border-subtle text-text-secondary hover:text-accent-primary transition-all shadow-sm"
+                aria-label="Next"
               >
-                →
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
               </motion.button>
             </div>
 
-            {/* Toggles */}
-            <div className="flex items-end justify-end md:justify-center pb-2 gap-3">
+            {/* Group 3: Toggles */}
+            <div className="flex-none flex items-end justify-end gap-3 pb-0.5 ml-auto">
               <MetronomeControl />
 
               <motion.button
-                whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                 onClick={() => setShowIntervals(!showIntervals)}
-                className="text-xs font-bold px-4 py-2 rounded-full bg-bg-surface border border-border-subtle text-text-secondary hover:text-accent-primary hover:border-accent-primary transition-colors"
+                className={`
+                    h-[40px] px-4 rounded-xl font-bold text-xs flex items-center gap-2 border shadow-sm transition-all
+                    ${showIntervals
+                    ? 'bg-bg-surface text-text-secondary border-border-subtle hover:border-accent-primary hover:text-accent-primary'
+                    : 'bg-bg-surface text-accent-primary border-accent-primary shadow-[0_0_8px_rgba(109,40,217,0.15)]'
+                  }
+                `}
               >
-                {showIntervals ? 'Showing Intervals' : 'Showing Notes'}
+                <span>{showIntervals ? 'Showing Intervals' : 'Showing Notes'}</span>
+                <div className={`w-1.5 h-1.5 rounded-full ${!showIntervals ? 'bg-accent-primary' : 'bg-border-strong'}`}></div>
               </motion.button>
             </div>
           </div>

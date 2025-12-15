@@ -32,11 +32,14 @@ export default function MusicPlayer() {
                 <motion.div
                     animate={{ rotate: isPlaying ? 360 : 0 }}
                     transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                    className="w-16 h-16 rounded-full bg-gradient-to-tr from-accent-primary to-purple-400 shadow-md flex items-center justify-center flex-shrink-0 relative overflow-hidden ring-2 ring-white/20"
+                    className="w-16 h-16 rounded-full bg-gradient-to-tr from-zinc-700 to-zinc-900 shadow-md flex items-center justify-center flex-shrink-0 relative overflow-hidden ring-2 ring-white/10"
                 >
-                    <div className="w-4 h-4 rounded-full bg-bg-surface absolute"></div>
+                    <div className="w-4 h-4 rounded-full bg-bg-surface absolute z-10"></div>
+                    {/* Vinyl grooves hint */}
+                    <div className="absolute inset-0 rounded-full border-2 border-white/5 opacity-50"></div>
+                    <div className="absolute inset-2 rounded-full border border-white/5 opacity-50"></div>
                     {/* Gloss effect */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
                 </motion.div>
 
                 {/* Track Info */}

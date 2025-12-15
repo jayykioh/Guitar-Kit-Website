@@ -44,31 +44,31 @@ export default function MetronomeControl() {
     return (
         <div className="relative z-50">
             {/* Main Button Control */}
-            <div className="flex items-center bg-bg-surface border border-border-subtle rounded-full p-1 pl-3 pr-1 shadow-sm transition-colors hover:border-accent-primary group">
+            <div className="flex items-center bg-bg-surface border border-border-subtle rounded-xl h-[40px] px-1 shadow-sm transition-colors hover:border-accent-primary group">
 
-                {/* Click text to open settings */}
+                {/* BPM Settings Trigger */}
                 <button
                     onClick={openModal}
-                    className="flex items-center gap-2 text-xs font-bold text-text-secondary group-hover:text-text-primary mr-2"
+                    className="flex items-center gap-2 px-3 h-full text-xs font-bold text-text-secondary hover:text-text-primary transition-colors border-r border-border-subtle/50"
                 >
                     <span className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-accent-primary animate-pulse' : 'bg-border-strong'}`}></span>
-                    {bpm} BPM
+                    <span className="tabular-nums">{bpm}</span> <span className="text-[10px] text-text-tertiary uppercase tracking-wide">BPM</span>
                 </button>
 
-                {/* Quick Toggle Button */}
+                {/* Quick Play Toggle */}
                 <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={togglePlay}
                     className={`
-                        w-6 h-6 rounded-full flex items-center justify-center transition-colors
-                        ${isPlaying ? 'bg-accent-primary text-bg-page' : 'bg-border-subtle text-text-tertiary hover:bg-border-strong hover:text-text-primary'}
+                        w-8 h-8 ml-1 rounded-lg flex items-center justify-center transition-colors
+                        ${isPlaying ? 'bg-accent-primary text-bg-page' : 'text-text-tertiary hover:bg-bg-surface-hover hover:text-text-primary'}
                     `}
                 >
                     {isPlaying ? (
-                        <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></svg>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></svg>
                     ) : (
-                        <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor" className="ml-0.5"><path d="M5 3l14 9-14 9V3z" /></svg>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="ml-0.5"><path d="M5 3l14 9-14 9V3z" /></svg>
                     )}
                 </motion.button>
             </div>
