@@ -39,32 +39,38 @@
     /* Slate-500 */
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        /* Professional Neutral - Dark Mode */
-        --bg-page: #000000;
-        /* Pure Black for maximum contrast (Spotify style) */
-        --bg-surface: #121212;
-        /* Spotify Surface */
-        --bg-surface-hover: #2a2a2a;
+/* Professional Neutral - Light Mode defaults are in :root above */
 
-        --text-primary: #ffffff;
-        --text-secondary: #b3b3b3;
-        --text-tertiary: #a7a7a7;
+/* Manual Dark Mode via Class (supported by next-themes) */
+.dark {
+    /* Professional Neutral - Dark Mode */
+    --bg-page: #000000;
+    /* Pure Black for maximum contrast (Spotify style) */
+    --bg-surface: #121212;
+    /* Spotify Surface */
+    --bg-surface-hover: #2a2a2a;
 
-        --border-subtle: #282828;
-        --border-strong: #404040;
+    --text-primary: #ffffff;
+    --text-secondary: #b3b3b3;
+    --text-tertiary: #a7a7a7;
 
-        --accent-primary: #1DB954;
-        /* Exact Spotify Green */
-        --accent-surface: #14592D;
-        /* Darker Green background */
+    --border-subtle: #282828;
+    --border-strong: #404040;
 
-        --fretboard-bg: #121212;
-        --fretboard-fret: #404040;
-        --string-color: #555555;
-    }
+    --accent-primary: #1DB954;
+    /* Exact Spotify Green */
+    --accent-surface: #14592D;
+    /* Darker Green background */
+
+    --fretboard-bg: #121212;
+    --fretboard-fret: #404040;
+    --string-color: #555555;
 }
+
+/* Fallback for System Preference if JS disabled or before hydration (optional, but .dark class usually handles it) 
+   next-themes handles system pref by adding the class automatically. 
+   So we stick to .dark selector only to avoid conflict. 
+*/
 
 @theme inline {
     --color-bg-page: var(--bg-page);
@@ -91,13 +97,16 @@ body {
     color: var(--text-primary);
     font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
+    /* Smooth Theme Transition (Background & Text) */
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
 }
 
-/* Minimalist Utilities */
+/* Minimalist Utilities - With Interaction Transitions */
 .min-panel {
     background: var(--bg-surface);
     border: 1px solid var(--border-subtle);
     border-radius: 8px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .min-select {
@@ -200,14 +209,16 @@ body {
     width: 40px;
 }
 
-/* Glassmorphism & Dashboard Utilities (Sprint 2 Refinement) */
+/* Glassmorphism & Dashboard Utilities (Calm & Transitional) */
 .glass-panel {
     background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    /* backdrop-filter: blur(12px); <-- Removed heavy blur per user request ("No blur-heavy filters")
+       Replaced with solid/translucent surface for stability */
     border: 1px solid rgba(229, 231, 235, 0.5);
     border-radius: 12px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    /* Soft, static shadow */
+    transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out, box-shadow 0.3s ease;
 }
 
 .dashboard-grid {
@@ -217,9 +228,8 @@ body {
     width: 100%;
 }
 
-@media (prefers-color-scheme: dark) {
-    .glass-panel {
-        background: rgba(17, 17, 17, 0.7);
-        border: 1px solid rgba(63, 63, 70, 0.5);
-    }
+/* Dark Mode Overrides for Glass Panel (Scoped to class, ignoring system pref if manual override) */
+.dark .glass-panel {
+    background: rgba(17, 17, 17, 0.7);
+    border: 1px solid rgba(63, 63, 70, 0.5);
 }

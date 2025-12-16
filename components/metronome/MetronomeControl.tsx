@@ -84,58 +84,80 @@ export default function MetronomeControl() {
                             onClick={handleCancel}
                         />
 
-                        {/* Modal */}
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="absolute bottom-full mb-3 right-0 w-64 bg-bg-surface border border-border-subtle rounded-xl shadow-xl p-4 z-[101]"
-                        >
-                            <h3 className="text-sm font-bold text-text-primary mb-3">Set Tempo</h3>
-
-                            {/* BPM Display & Controls */}
-                            <div className="flex items-center justify-between gap-2 mb-4">
-                                <motion.button whileTap={{ scale: 0.9 }} onClick={decrement} className="w-8 h-8 flex items-center justify-center rounded-lg border border-border-subtle hover:bg-bg-surface-hover text-lg font-medium">-</motion.button>
-                                <div className="flex-grow text-center">
-                                    <input
-                                        type="number"
-                                        value={tempBpm}
-                                        onChange={(e) => setTempBpm(Number(e.target.value))}
-                                        className="w-16 text-center text-2xl font-black text-accent-primary bg-transparent focus:outline-none"
-                                    />
-                                    <span className="text-xs text-text-tertiary block -mt-1">BPM</span>
+                        {/* Modal Container - Centered Fixed Overlay */}
+                        <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                                className="w-full max-w-xs bg-bg-surface border border-border-subtle rounded-xl shadow-2xl p-6 pointer-events-auto shadow-glow/10"
+                            >
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-bold text-text-primary">Set Tempo</h3>
+                                    <span className="text-xs text-text-tertiary uppercase tracking-wider font-semibold">BPM</span>
                                 </div>
-                                <motion.button whileTap={{ scale: 0.9 }} onClick={increment} className="w-8 h-8 flex items-center justify-center rounded-lg border border-border-subtle hover:bg-bg-surface-hover text-lg font-medium">+</motion.button>
-                            </div>
 
-                            {/* Slider */}
-                            <input
-                                type="range"
-                                min="30" max="300"
-                                value={tempBpm}
-                                onChange={handleSliderChange}
-                                className="w-full mb-4 accent-accent-primary h-1 bg-border-subtle rounded-full appearance-none cursor-pointer"
-                            />
+                                {/* BPM Display & Controls */}
+                                <div className="flex items-center justify-between gap-4 mb-6">
+                                    <motion.button
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={decrement}
+                                        className="w-12 h-12 flex items-center justify-center rounded-xl bg-bg-surface border border-border-subtle hover:bg-bg-surface-hover hover:border-text-tertiary transition-all text-xl font-medium shadow-sm"
+                                    >
+                                        −
+                                    </motion.button>
 
-                            {/* Actions */}
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={handleConfirm}
-                                    className="flex-1 bg-accent-primary text-bg-page py-2 rounded-lg text-xs font-bold hover:opacity-90 transition-opacity"
-                                >
-                                    Set BPM
-                                </button>
-                                <button
-                                    onClick={handleCancel}
-                                    className="px-3 py-2 rounded-lg text-xs font-bold text-text-secondary hover:bg-bg-surface-hover transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                            </div>
+                                    <div className="flex-grow text-center relative">
+                                        <input
+                                            type="number"
+                                            value={tempBpm}
+                                            onChange={(e) => setTempBpm(Number(e.target.value))}
+                                            className="w-24 text-center text-4xl font-black text-accent-primary bg-transparent focus:outline-none"
+                                        />
+                                    </div>
 
-                            {/* Arrow Tip */}
-                            <div className="absolute top-full right-6 w-3 h-3 bg-bg-surface border-b border-r border-border-subtle rotate-45 -mt-1.5"></div>
-                        </motion.div>
+                                    <motion.button
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={increment}
+                                        className="w-12 h-12 flex items-center justify-center rounded-xl bg-bg-surface border border-border-subtle hover:bg-bg-surface-hover hover:border-text-tertiary transition-all text-xl font-medium shadow-sm"
+                                    >
+                                        +
+                                    </motion.button>
+                                </div>
+
+                                {/* Slider */}
+                                <div className="mb-6 px-1">
+                                    <input
+                                        type="range"
+                                        min="30" max="300"
+                                        value={tempBpm}
+                                        onChange={handleSliderChange}
+                                        className="w-full h-2 bg-bg-surface-hover rounded-full appearance-none cursor-pointer accent-accent-primary"
+                                    />
+                                    <div className="flex justify-between text-[10px] text-text-tertiary font-medium mt-2 px-1">
+                                        <span>30</span>
+                                        <span>120</span>
+                                        <span>300</span>
+                                    </div>
+                                </div>
+
+                                {/* Actions */}
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button
+                                        onClick={handleCancel}
+                                        className="px-4 py-3 rounded-xl text-sm font-bold text-text-secondary bg-transparent border border-border-subtle hover:bg-bg-surface-hover hover:text-text-primary transition-all"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleConfirm}
+                                        className="px-4 py-3 rounded-xl text-sm font-bold text-bg-page bg-accent-primary hover:opacity-90 transition-opacity shadow-lg shadow-accent-primary/20"
+                                    >
+                                        Apply
+                                    </button>
+                                </div>
+                            </motion.div>
+                        </div>
                     </>
                 )}
             </AnimatePresence>

@@ -27,7 +27,8 @@ export default function MusicPlayer() {
         <div className="flex flex-col gap-4 w-full h-full justify-between">
 
             {/* Top: Player Display (Apple Music Style) */}
-            <div className="flex items-center gap-4 bg-bg-surface-hover/50 p-3 rounded-xl border border-border-subtle/50">
+            {/* Top: Player Display (Unified) */}
+            <div className="flex items-center gap-4 bg-bg-surface p-3 rounded-xl border border-border-subtle">
                 {/* Album Art / Rotating CD */}
                 <motion.div
                     animate={{ rotate: isPlaying ? 360 : 0 }}

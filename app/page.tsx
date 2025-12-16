@@ -105,10 +105,8 @@ export default function Home() {
         {/* LEFT: HERO & CONTROLS (Cols 1-8) */}
         <div className="lg:col-span-8 glass-panel p-6 flex flex-col justify-between shadow-sm relative group">
 
-          {/* Artistic Background Layer (Clipped) */}
-          <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-accent-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-accent-primary/10 transition-colors duration-500"></div>
-          </div>
+          {/* Clean Background Layer - No heavy blur/glow */}
+          <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none bg-gradient-to-br from-transparent to-bg-surface-hover/30 transition-colors duration-300"></div>
 
           {/* HERO TYPOGRAPHY: Scale Name */}
           <div className="mb-6 relative z-10">
