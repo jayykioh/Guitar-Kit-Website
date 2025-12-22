@@ -17,7 +17,7 @@ export default function Header() {
     }, []);
 
     const navItems = [
-        { name: 'Tuner', href: '/tuner' },
+        { name: 'Dashboard', href: '/dashboard' },
         { name: 'Practice', href: '/' },
         { name: 'Songs', href: '/songs' },
     ];
@@ -128,12 +128,16 @@ export default function Header() {
                         )}
                     </button>
 
-                    {/* Auth Placeholder */}
-                    <button className="w-9 h-9 rounded-full bg-bg-surface border border-border-subtle overflow-hidden hover:border-text-tertiary transition-colors">
-                        <div className="w-full h-full bg-gradient-to-br from-zinc-700 to-zinc-900 flex items-center justify-center text-[10px] font-bold text-white">
-                            US
-                        </div>
-                    </button>
+                    {/* Auth State (Mock) */}
+                    {/* For demo, simpler logic: if pathname is not login, show Login button. Real app would check user session. */}
+                    {pathname !== '/login' && (
+                        <Link href="/login">
+                            <button className="min-btn px-5 py-2 h-10 bg-bg-surface hover:bg-bg-surface-hover text-text-primary border border-border-subtle rounded-full text-sm font-bold shadow-sm transition-all flex items-center gap-2 group">
+                                <svg className="w-5 h-5 text-text-secondary group-hover:text-accent-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
+                                <span>Log In</span>
+                            </button>
+                        </Link>
+                    )}
                 </div>
             </div>
         </header>
