@@ -4,53 +4,33 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
-// Scale definitions - Major, Minor, Pentatonic, Modes, etc.
-model Scale {
-  id          String     @id @default(cuid())
-  name        String     @unique // "Major", "Minor Pentatonic", "Dorian"
-  intervals   Int[]      // [0, 2, 4, 5, 7, 9, 11] for Major scale
-  formula     String     // "W-W-H-W-W-W-H" display formula
-  category    String     // "Major", "Minor", "Pentatonic", "Modal", "Exotic"
-  description String?    // Optional description
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  favorites   Favorite[]
-}
+// ============================================
+// USER DATA MODELS
+// ============================================
 
-// Guitar tuning configurations
-model Tuning {
-  id         String   @id @default(cuid())
-  name       String   @unique // "Standard", "Drop D", "Open G"
-  notes      String[] // ["E", "A", "D", "G", "B", "E"] from low to high
-  isStandard Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-}
-
-// User accounts (prepared for NextAuth in Sprint 3)
+// User accounts (for NextAuth)
 model User {
-  id        String     @id @default(cuid())
-  email     String     @unique
-  name      String?
-  image     String?
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  favorites Favorite[]
-  earTrainingResults EarTrainingResult[]
+  id               String            @id @default(cuid())
+  email            String            @unique
+  name             String?
+  image            String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  favorites        Favorite[]
+  practiceSessions PracticeSession[]
+  songs            Song[]
 }
 
-// User saved favorite scales
+// User's favorite scales
 model Favorite {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  scaleId   String
-  scale     Scale    @relation(fields: [scaleId], references: [id], onDelete: Cascade)
+  scaleId   String   // Reference to hardcoded scale ID (e.g., "minor-pentatonic")
   key       String   // Root note: "A", "C#", "Eb", etc.
-  tuningId  String   // Reference to tuning
+  tuningId  String   // Reference to hardcoded tuning ID (e.g., "standard")
   notes     String?  // Optional user notes
   createdAt DateTime @default(now())
 
@@ -58,16 +38,39 @@ model Favorite {
   @@index([userId])
 }
 
-// Ear training results (Sprint 3)
-model EarTrainingResult {
+// Practice session history (simplified for MVP)
+model PracticeSession {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  exercise  String   // "note", "interval", "chord"
-  score     Int      // Correct answers count
-  total     Int      // Total questions
-  accuracy  Float    // Percentage
+  duration  Int      // Duration in minutes (required)
+  focus     String?  // Optional: "Scales", "Chords", "Songs", etc.
   createdAt DateTime @default(now())
 
   @@index([userId, createdAt])
 }
+
+// User's song library & backing tracks
+model Song {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title         String
+  artist        String?
+  difficulty    String?  // "Beginner", "Intermediate", "Advanced"
+  genre         String?
+  key           String?  // Song key (e.g., "Am", "G")
+  bpm           Int?
+  audioUrl      String?  // URL to backing track/audio file
+  tabUrl        String?  // URL to tab/sheet music
+  notes         String?  // User notes
+  progress      Int      @default(0) // 0-100%
+  lastPracticed DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([userId, title, artist])
+  @@index([userId])
+  @@index([userId, lastPracticed])
+}
+

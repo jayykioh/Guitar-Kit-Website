@@ -1,17 +1,19 @@
-// Prisma client will be available after running: npx prisma generate
-// Temporarily using a placeholder until database is configured
+import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
 
 const globalForPrisma = globalThis as unknown as {
-    prisma: any | undefined;
+    prisma: PrismaClient | undefined;
 };
 
-// Placeholder - will be replaced after Prisma setup
-export const prisma = globalForPrisma.prisma ?? null;
+// Create connection pool with DATABASE_URL (pooling)
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
 
-// After setting up Supabase and running migrations, uncomment:
-// import { PrismaClient } from '@prisma/client';
-// export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-//   log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-// });
+// Use DATABASE_URL for app runtime (pooling connection)
+export const prisma = globalForPrisma.prisma ?? new PrismaClient({
+    adapter,
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+});
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;

@@ -6,11 +6,14 @@ import { motion, LayoutGroup } from 'framer-motion';
 
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
+import { useUser } from '@/hooks/useUser';
+import { UserMenu } from '@/components/ui/UserMenu';
 
 export default function Header() {
     const pathname = usePathname();
     const { theme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
+    const { user } = useUser();
 
     useEffect(() => {
         setMounted(true);
@@ -18,7 +21,7 @@ export default function Header() {
 
     const navItems = [
         { name: 'Dashboard', href: '/dashboard' },
-        { name: 'Practice', href: '/' },
+        { name: 'Practice', href: '/practice' },
         { name: 'Songs', href: '/songs' },
     ];
 
@@ -82,7 +85,7 @@ export default function Header() {
                         aria-label="Toggle Theme"
                     >
                         {mounted ? (
-                            <div className="relative w-5 h-5">
+                            <div className="relative w-5 h-5 flex items-center justify-center">
                                 {/* Sun Icon (Visible in Light) */}
                                 <motion.div
                                     initial={false}
@@ -92,19 +95,9 @@ export default function Header() {
                                         opacity: theme === 'dark' ? 0 : 1
                                     }}
                                     transition={{ duration: 0.25, ease: "easeInOut" }}
-                                    className="absolute inset-0 origin-center"
+                                    className="absolute inset-0 origin-center flex items-center justify-center"
                                 >
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <circle cx="12" cy="12" r="5"></circle>
-                                        <line x1="12" y1="1" x2="12" y2="3"></line>
-                                        <line x1="12" y1="21" x2="12" y2="23"></line>
-                                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                                        <line x1="1" y1="12" x2="3" y2="12"></line>
-                                        <line x1="21" y1="12" x2="23" y2="12"></line>
-                                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                                    </svg>
+                                    <span className="material-symbols-outlined text-[20px]">light_mode</span>
                                 </motion.div>
 
                                 {/* Moon Icon (Visible in Dark) */}
@@ -116,11 +109,9 @@ export default function Header() {
                                         opacity: theme === 'dark' ? 1 : 0
                                     }}
                                     transition={{ duration: 0.25, ease: "easeInOut" }}
-                                    className="absolute inset-0 origin-center"
+                                    className="absolute inset-0 origin-center flex items-center justify-center"
                                 >
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none">
-                                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                                    </svg>
+                                    <span className="material-symbols-outlined text-[20px] filled" style={{ fontVariationSettings: "'FILL' 1" }}>dark_mode</span>
                                 </motion.div>
                             </div>
                         ) : (
@@ -128,18 +119,22 @@ export default function Header() {
                         )}
                     </button>
 
-                    {/* Auth State (Mock) */}
-                    {/* For demo, simpler logic: if pathname is not login, show Login button. Real app would check user session. */}
-                    {pathname !== '/login' && (
-                        <Link href="/login">
-                            <button className="min-btn px-5 py-2 h-10 bg-bg-surface hover:bg-bg-surface-hover text-text-primary border border-border-subtle rounded-full text-sm font-bold shadow-sm transition-all flex items-center gap-2 group">
-                                <svg className="w-5 h-5 text-text-secondary group-hover:text-accent-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
-                                <span>Log In</span>
-                            </button>
-                        </Link>
+                    {/* User Profile or Login */}
+                    {user ? (
+                        <UserMenu user={user} />
+                    ) : (
+                        pathname !== '/login' && (
+                            <Link href="/login">
+                                <button className="min-btn px-5 py-2 h-10 bg-bg-surface hover:bg-bg-surface-hover text-text-primary border border-border-subtle rounded-full text-sm font-bold shadow-sm transition-all flex items-center gap-2 group">
+                                    <span className="material-symbols-outlined text-[20px] text-text-secondary group-hover:text-accent-primary transition-colors">login</span>
+                                    <span>Log In</span>
+                                </button>
+                            </Link>
+                        )
                     )}
                 </div>
             </div>
         </header>
     );
 }
+
