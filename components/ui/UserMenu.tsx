@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
+import { signOut } from 'next-auth/react';
 
 interface UserMenuProps {
     user: {
@@ -15,13 +16,13 @@ interface UserMenuProps {
 export function UserMenu({ user, onLogout }: UserMenuProps) {
     const [isOpen, setIsOpen] = useState(false);
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        setIsOpen(false);
         if (onLogout) {
             onLogout();
         } else {
-            // Default logout: clear localStorage and reload
-            localStorage.clear();
-            window.location.href = '/';
+            // Use NextAuth signOut
+            await signOut({ callbackUrl: '/' });
         }
     };
 
@@ -109,6 +110,19 @@ export function UserMenu({ user, onLogout }: UserMenuProps) {
                                         dashboard
                                     </span>
                                     <span className="text-sm font-medium text-text-primary">Dashboard</span>
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        setIsOpen(false);
+                                        window.location.href = '/practice';
+                                    }}
+                                    className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-bg-surface-hover transition-colors text-left group"
+                                >
+                                    <span className="material-symbols-outlined text-[20px] text-text-secondary group-hover:text-accent-primary">
+                                        music_note
+                                    </span>
+                                    <span className="text-sm font-medium text-text-primary">Practice</span>
                                 </button>
 
                                 <button

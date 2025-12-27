@@ -35,7 +35,7 @@ export function useUserStats() {
       try {
         setIsLoading(true);
         const response = await fetch(`/api/user/stats?userId=${user.id}`);
-        
+
         if (!response.ok) {
           throw new Error('Failed to fetch user stats');
         }
@@ -52,7 +52,8 @@ export function useUserStats() {
     }
 
     fetchStats();
-  }, [user]);
+  }, [user?.id]); // Only re-fetch when user ID changes, not when user object reference changes
+
 
   return { stats, isLoading, error };
 }

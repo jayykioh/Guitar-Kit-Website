@@ -15,12 +15,50 @@ model User {
   id               String            @id @default(cuid())
   email            String            @unique
   name             String?
+  emailVerified    DateTime?
   image            String?
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  password         String?           // For manual login (hashed)
+  
+  // NextAuth relations
+  accounts         Account[]
+  
+  // App relations
   favorites        Favorite[]
   practiceSessions PracticeSession[]
   songs            Song[]
+  
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+}
+
+// NextAuth Account model (for OAuth providers)
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+// NextAuth VerificationToken model
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }
 
 // User's favorite scales

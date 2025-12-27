@@ -34,7 +34,7 @@ export function useSongs() {
       try {
         setIsLoading(true);
         const response = await fetch(`/api/songs?userId=${user.id}`);
-        
+
         if (!response.ok) {
           throw new Error('Failed to fetch songs');
         }
@@ -51,7 +51,8 @@ export function useSongs() {
     }
 
     fetchSongs();
-  }, [user]);
+  }, [user?.id]); // Only re-fetch when user ID changes, not when user object reference changes
+
 
   return { songs, isLoading, error };
 }
