@@ -5,7 +5,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
-    
+
     if (!userId) {
       return NextResponse.json({ error: 'userId is required' }, { status: 400 });
     }
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
           orderBy: { createdAt: 'desc' },
           take: 10,
         },
-        songs: true,
+        savedSongs: true,
         favorites: true,
       },
     });
@@ -36,21 +36,21 @@ export async function GET(request: Request) {
     const recentSessions = user.practiceSessions.slice(0, 3).map((session) => ({
       date: session.createdAt.toISOString().split('T')[0],
       duration: session.duration,
-      focus: session.focus || 'General practice',
+      focus: session.focusType || 'General practice',
     }));
 
     const stats = {
       userName: user.name || 'Guitarist',
       userEmail: user.email,
       totalPractice,
-      totalSongs: user.songs.length,
+      totalSongs: user.savedSongs.length,
       totalFavorites: user.favorites.length,
       totalSessions: user.practiceSessions.length,
       recentSessions,
       dailyGoal: 45, // TODO: Make this user-configurable
       dailyProgress: recentSessions[0]?.duration || 0,
     };
-    
+
     return NextResponse.json(stats);
   } catch (error) {
     console.error('Failed to fetch user stats:', error);

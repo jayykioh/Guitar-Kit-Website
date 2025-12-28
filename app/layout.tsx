@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/layout/Header";
+import { MainLayout } from "@/components/layout/MainLayout";
 
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { SessionProvider } from "@/components/providers/SessionProvider";
@@ -32,7 +32,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-bg-page text-text-primary pt-16`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-bg-page text-text-primary`}
       >
         <ThemeProvider
           attribute="class"
@@ -41,12 +41,12 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <SessionProvider>
-            <Header />
-            {children}
+            <MainLayout>
+              {children}
+            </MainLayout>
           </SessionProvider>
         </ThemeProvider>
       </body>
     </html>
   );
 }
-

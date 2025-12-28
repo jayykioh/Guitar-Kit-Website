@@ -1,107 +1,71 @@
-import 'dotenv/config';
-import { PrismaClient } from '@prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
-import { Pool } from 'pg';
+import { config } from 'dotenv';
+config(); // Load .env file
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new PrismaPg(pool);
-
-const prisma = new PrismaClient({
-    adapter,
-    log: ['query', 'info', 'warn', 'error'],
-});
-
-/**
- * Seed database with test data
- * Tests all models: User, Favorite, PracticeSession, Song
- */
 async function main() {
-    console.log('🌱 Seeding database...');
+    // Dynamic import to ensure .env is loaded before Prisma client initialization
+    const { prisma } = await import('./prisma');
 
-    // 1. Create test user
-    const user = await prisma.user.upsert({
-        where: { email: 'test@guitarart.com' },
-        update: {},
-        create: {
-            email: 'test@guitarart.com',
-            name: 'Test User',
-            image: null,
-        },
-    });
-    console.log('✅ Created user:', user.email);
+    console.log("🌱 Starting seed...");
 
-    // 2. Create favorite scales
-    await prisma.favorite.upsert({
-        where: {
-            userId_scaleId_key_tuningId: {
-                userId: user.id,
-                scaleId: 'minor-pentatonic',
-                key: 'A',
-                tuningId: 'standard',
-            },
-        },
-        update: {},
-        create: {
-            userId: user.id,
-            scaleId: 'minor-pentatonic',
-            key: 'A',
-            tuningId: 'standard',
-            notes: 'My favorite scale for rock solos',
-        },
-    });
-    console.log('✅ Created favorite: A Minor Pentatonic');
+    try {
+        // Optional: Clean up existing backing tracks to avoid duplicates if re-running
+        // await prisma.backingTrack.deleteMany({}); 
 
-    // 3. Create practice session (minimal)
-    await prisma.practiceSession.create({
-        data: {
-            userId: user.id,
-            duration: 45,
-            focus: 'Scales',
-        },
-    });
-    console.log('✅ Created practice session (45 min)');
-
-    // 4. Create songs
-    const existingSong = await prisma.song.findFirst({
-        where: {
-            userId: user.id,
-            title: 'Wonderwall',
-        },
-    });
-
-    if (!existingSong) {
-        await prisma.song.create({
-            data: {
-                userId: user.id,
-                title: 'Wonderwall',
-                artist: 'Oasis',
-                difficulty: 'Beginner',
-                genre: 'Rock',
-                key: 'Em',
-                bpm: 87,
-                progress: 85,
-                notes: 'Chords: Em, G, D, A7sus4',
-                lastPracticed: new Date(),
-            },
+        await prisma.backingTrack.createMany({
+            data: [
+                {
+                    name: "A Minor BLUES - Simple Groove",
+                    key: "Am", // Normalized to standard notation if needed
+                    genre: "Blues",
+                    bpm: 80, // Guessing BPM or leaving null if unknown, user didn't provide but schema has it.
+                    audioUrl:
+                        "https://wiepgwzjsvvwvcydwzjp.supabase.co/storage/v1/object/sign/Backing%20Track/A%20Minor%20BLUES%20-%20Simple%20Groove%20Backing%20Track.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9jM2QxZjlhOS1jN2ZiLTRmMGQtOTY2OS1hYjUxZTJiMmM0NjgiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJCYWNraW5nIFRyYWNrL0EgTWlub3IgQkxVRVMgLSBTaW1wbGUgR3Jvb3ZlIEJhY2tpbmcgVHJhY2subXAzIiwiaWF0IjoxNzY2OTM1NDc3LCJleHAiOjE3OTg0NzE0Nzd9.gzNPVnzrJHnK2sxmUkhizzwYlSBfn2eEwg7uu2Nqx3g",
+                },
+                {
+                    name: "Ambient Worship Backing Track",
+                    key: "A",
+                    genre: "Worship",
+                    audioUrl:
+                        "https://wiepgwzjsvvwvcydwzjp.supabase.co/storage/v1/object/sign/Backing%20Track/Ambient%20%20Worship%20Backing%20Track%20(Key%20of%20A).mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9jM2QxZjlhOS1jN2ZiLTRmMGQtOTY2OS1hYjUxZTJiMmM0NjgiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJCYWNraW5nIFRyYWNrL0FtYmllbnQgIFdvcnNoaXAgQmFja2luZyBUcmFjayAoS2V5IG9mIEEpLm1wMyIsImlhdCI6MTc2NjkzNTQ5NCwiZXhwIjoxNzk4NDcxNDk0fQ.y0RqZ9xb2K68aOjVlKVxA4X3NZc6s2-to5k8W-46C4k",
+                },
+                {
+                    name: "Neo-Soul Guitar Jam Track",
+                    key: "Em",
+                    genre: "Neo-Soul",
+                    audioUrl:
+                        "https://wiepgwzjsvvwvcydwzjp.supabase.co/storage/v1/object/sign/Backing%20Track/Neo-Soul%20Guitar%20Jam%20Track%20(key%20of%20Em).mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9jM2QxZjlhOS1jN2ZiLTRmMGQtOTY2OS1hYjUxZTJiMmM0NjgiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJCYWNraW5nIFRyYWNrL05lby1Tb3VsIEd1aXRhciBKYW0gVHJhY2sgKGtleSBvZiBFbSkubXAzIiwiaWF0IjoxNzY2OTM1NTA2LCJleHAiOjE3OTg0NzE1MDZ9.FQw9qmWsj62zx2zxaYl8pvGJqCLaRId3hrI607PYAAA",
+                },
+                {
+                    name: "Rock Guitar Backing Track",
+                    key: "Bm",
+                    genre: "Rock",
+                    audioUrl:
+                        "https://wiepgwzjsvvwvcydwzjp.supabase.co/storage/v1/object/sign/Backing%20Track/Rock%20Guitar%20Backing%20Track%20in%20B%20Minor.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9jM2QxZjlhOS1jN2ZiLTRmMGQtOTY2OS1hYjUxZTJiMmM0NjgiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJCYWNraW5nIFRyYWNrL1JvY2sgR3VpdGFyIEJhY2tpbmcgVHJhY2sgaW4gQiBNaW5vci5tcDMiLCJpYXQiOjE3NjY5MzU1MjIsImV4cCI6MTc5ODQ3MTUyMn0.0I_fJGBJovW4yvPsbbPSKoSbbd4HxyTj7ni__a4b0bE",
+                },
+                {
+                    name: "Slow Blues Jam – Sexy Guitar",
+                    key: "C",
+                    genre: "Blues",
+                    audioUrl:
+                        "https://wiepgwzjsvvwvcydwzjp.supabase.co/storage/v1/object/sign/Backing%20Track/Slow%20Blues%20Jam%20%20Sexy%20Guitar%20Backing%20Track%20(C).mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9jM2QxZjlhOS1jN2ZiLTRmMGQtOTY2OS1hYjUxZTJiMmM0NjgiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJCYWNraW5nIFRyYWNrL1Nsb3cgQmx1ZXMgSmFtICBTZXh5IEd1aXRhciBCYWNraW5nIFRyYWNrIChDKS5tcDMiLCJpYXQiOjE3NjY5MzU1MzUsImV4cCI6MTc5ODQ3MTUzNX0.pVXYnXSKM94PmC-tbfgq5PgnDUeOuyOuXgAo_qSRS-c",
+                },
+                {
+                    name: "Smooth R&B Guitar – Night Vibes",
+                    key: "E",
+                    genre: "R&B",
+                    audioUrl:
+                        "https://wiepgwzjsvvwvcydwzjp.supabase.co/storage/v1/object/sign/Backing%20Track/Smooth%20R&B%20Guitar%20Backing%20Track%20in%20E%20%20Night%20Vibes.mp3?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9jM2QxZjlhOS1jN2ZiLTRmMGQtOTY2OS1hYjUxZTJiMmM0NjgiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJCYWNraW5nIFRyYWNrL1Ntb290aCBSJkIgR3VpdGFyIEJhY2tpbmcgVHJhY2sgaW4gRSAgTmlnaHQgVmliZXMubXAzIiwiaWF0IjoxNzY2OTM1NTQ4LCJleHAiOjE3OTg0NzE1NDh9.59pj3P8T1zwUdy58CFaYvR9NNxpakg2srZoLrmsGbQA",
+                },
+            ],
         });
-        console.log('✅ Created song: Wonderwall');
-    } else {
-        console.log('✅ Song already exists: Wonderwall');
-    }
 
-    console.log('🎉 Database seeded successfully!');
-    console.log('\n📊 Summary:');
-    console.log('  - 1 User');
-    console.log('  - 1 Favorite scale');
-    console.log('  - 1 Practice session');
-    console.log('  - 1 Song');
+        console.log("✅ Backing tracks seeded with key & genre");
+    } catch (e) {
+        console.error(e);
+        process.exit(1);
+    } finally {
+        if (prisma) await prisma.$disconnect();
+    }
 }
 
-main()
-    .catch((e) => {
-        console.error('❌ Seeding failed:', e);
-        process.exit(1);
-    })
-    .finally(async () => {
-        await prisma.$disconnect();
-    });
+main().catch(console.error);

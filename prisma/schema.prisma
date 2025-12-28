@@ -25,7 +25,7 @@ model User {
   // App relations
   favorites        Favorite[]
   practiceSessions PracticeSession[]
-  songs            Song[]
+  savedSongs       SavedSong[]
   
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
@@ -76,39 +76,68 @@ model Favorite {
   @@index([userId])
 }
 
-// Practice session history (simplified for MVP)
+// Practice session history
 model PracticeSession {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   duration  Int      // Duration in minutes (required)
-  focus     String?  // Optional: "Scales", "Chords", "Songs", etc.
+  focusType String   // "SCALES", "SONGS", "TECHNIQUE", "FREE"
+  songId    String?
+  song      Song?    @relation(fields: [songId], references: [id])
+  notes     String?
   createdAt DateTime @default(now())
 
   @@index([userId, createdAt])
 }
 
-// User's song library & backing tracks
+// Global Song Catalog
 model Song {
   id            String   @id @default(cuid())
-  userId        String
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   title         String
-  artist        String?
+  artist        String
   difficulty    String?  // "Beginner", "Intermediate", "Advanced"
   genre         String?
   key           String?  // Song key (e.g., "Am", "G")
   bpm           Int?
-  audioUrl      String?  // URL to backing track/audio file
+  audioUrl      String?  // URL to simple backing track/audio file
   tabUrl        String?  // URL to tab/sheet music
-  notes         String?  // User notes
-  progress      Int      @default(0) // 0-100%
-  lastPracticed DateTime?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  @@unique([userId, title, artist])
+  // Relations
+  backingTracks    BackingTrack[]
+  savedBy          SavedSong[]
+  practiceSessions PracticeSession[]
+
+  @@index([title, artist])
+}
+
+// User's Saved/Favorite Songs
+model SavedSong {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  songId    String
+  song      Song     @relation(fields: [songId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, songId])
   @@index([userId])
-  @@index([userId, lastPracticed])
+}
+
+// Audio Assets (Backing Tracks)
+model BackingTrack {
+  id        String   @id @default(cuid())
+  songId    String?
+  song      Song?    @relation(fields: [songId], references: [id])
+  name      String   // e.g. "Full Mix", "Drums Only", "No Guitar"
+  bpm       Int?     // Real BPM of the track
+  genre     String?  // Optional (Rock / Jazz / Funk)
+  key       String?  // Optional (if track is transposed)
+  audioUrl  String
+  createdAt DateTime @default(now())
+
+  @@index([songId])
 }
 

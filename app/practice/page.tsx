@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { motion, Variants } from 'framer-motion';
+import { useState, useMemo, useEffect } from 'react';
+import { motion, Variants, AnimatePresence } from 'framer-motion';
+import { useSearchParams } from 'next/navigation';
 import { getScale, getScaleById, getAllScales } from '@/lib/music/scales';
 import { getTuningById, mapScaleToFretboard } from '@/lib/music/fretboard';
 import { ALL_PATTERNS, getPatternById } from '@/lib/music/patterns';
@@ -15,14 +16,47 @@ import MetronomeControl from '@/components/metronome/MetronomeControl';
 import Fretboard from '@/components/fretboard/Fretboard';
 import AnimatedDropdown from '@/components/ui/AnimatedDropdown';
 
+// New Imports
+import { usePracticeTracker } from '@/hooks/usePracticeTracker';
+import { useSongs, Song } from '@/hooks/useSongs';
+
 const KEYS: NoteName[] = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
 export default function PracticePage() {
+    // URL Params
+    const searchParams = useSearchParams();
+    const songId = searchParams.get('songId');
+
+    // Hooks
+    const { songs } = useSongs();
+    const { isTracking, formattedTime, trackInteraction } = usePracticeTracker();
+
+    // State
     const [selectedScale, setSelectedScale] = useState('minor-pentatonic');
     const [selectedKey, setSelectedKey] = useState<NoteName>('A');
     const [selectedTuning, setSelectedTuning] = useState('standard');
     const [selectedPatternId, setSelectedPatternId] = useState<string>('');
     const [showIntervals, setShowIntervals] = useState(true);
+
+    // Song Focus State
+    const [activeSong, setActiveSong] = useState<Song | null>(null);
+
+    // Initialize Focus Mode if songId is present
+    useEffect(() => {
+        if (songId && songs.length > 0) {
+            const song = songs.find(s => s.id === songId);
+            if (song) {
+                setActiveSong(song);
+                // Also notify tracker of song context
+                trackInteraction('SETTINGS', { focusType: 'SONG', songId: song.id });
+
+                // Auto-set Key if valid
+                if (song.key && KEYS.includes(song.key as NoteName)) {
+                    setSelectedKey(song.key as NoteName);
+                }
+            }
+        }
+    }, [songId, songs, trackInteraction]);
 
     // Data for Dropdowns
     const keyOptions = KEYS.map(k => ({ value: k, label: k }));
@@ -38,6 +72,7 @@ export default function PracticePage() {
 
     // Logic to cycle patterns
     const handlePatternCycle = (direction: 'prev' | 'next') => {
+        // trackInteraction('FRETBOARD'); // Removed as requested
         const pentatonicPatterns = ALL_PATTERNS.filter(p => p.type === 'pentatonic');
         const currentIndex = pentatonicPatterns.findIndex(p => p.id === selectedPatternId);
 
@@ -105,32 +140,55 @@ export default function PracticePage() {
                 {/* LEFT: HERO & CONTROLS (Cols 1-8) */}
                 <div className="lg:col-span-8 glass-panel p-6 flex flex-col justify-between shadow-sm relative group">
 
-                    {/* Clean Background Layer - No heavy blur/glow */}
+                    {/* Clean Background Layer */}
                     <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none bg-gradient-to-br from-transparent to-bg-surface-hover/30 transition-colors duration-300"></div>
 
-                    {/* HERO TYPOGRAPHY: Scale Name */}
+                    {/* FOCUS MODE BANNER */}
+                    {activeSong && (
+                        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent-primary via-purple-400 to-accent-primary animate-pulse"></div>
+                    )}
+
+                    {/* HERO TYPOGRAPHY: Scale Name / Song Name */}
                     <div className="mb-6 relative z-10">
-                        <motion.div
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            key={`${selectedKey}-${selectedScale}`} // Re-animate on change
-                            className="flex flex-col"
-                        >
-                            <div className="flex items-baseline gap-3">
-                                <h1 className="text-5xl md:text-6xl font-black tracking-tight text-text-primary">
-                                    {selectedKey}
+                        {activeSong ? (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+                                className="flex flex-col gap-1"
+                            >
+                                <div className="flex items-center gap-2 text-accent-primary font-bold text-xs uppercase tracking-widest">
+                                    <span className="w-2 h-2 rounded-full bg-accent-primary animate-pulse"></span>
+                                    Focus Mode
+                                </div>
+                                <h1 className="text-4xl md:text-5xl font-black tracking-tight text-text-primary truncate">
+                                    {activeSong.title}
                                 </h1>
-                                <span className="text-3xl md:text-4xl font-light text-text-secondary">
-                                    {scaleInfo?.name}
-                                </span>
-                            </div>
-                            <p className="text-lg font-medium text-accent-primary mt-1 flex items-center gap-2">
-                                {activePattern
-                                    ? <span className="bg-accent-surface px-2 py-0.5 rounded text-accent-primary text-sm uppercase tracking-wide font-bold">{patternDefinition?.name}</span>
-                                    : <span className="text-text-tertiary">Full Fretboard View</span>
-                                }
-                            </p>
-                        </motion.div>
+                                <p className="text-xl text-text-secondary font-medium">
+                                    {activeSong.artist} • {activeSong.bpm} BPM
+                                </p>
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                key={`${selectedKey}-${selectedScale}`} // Re-animate on change
+                                className="flex flex-col"
+                            >
+                                <div className="flex items-baseline gap-3">
+                                    <h1 className="text-5xl md:text-6xl font-black tracking-tight text-text-primary">
+                                        {selectedKey}
+                                    </h1>
+                                    <span className="text-3xl md:text-4xl font-light text-text-secondary">
+                                        {scaleInfo?.name}
+                                    </span>
+                                </div>
+                                <p className="text-lg font-medium text-accent-primary mt-1 flex items-center gap-2">
+                                    {activePattern
+                                        ? <span className="bg-accent-surface px-2 py-0.5 rounded text-accent-primary text-sm uppercase tracking-wide font-bold">{patternDefinition?.name}</span>
+                                        : <span className="text-text-tertiary">Full Fretboard View</span>
+                                    }
+                                </p>
+                            </motion.div>
+                        )}
                     </div>
 
                     {/* CONTROLS ROW */}
@@ -188,8 +246,9 @@ export default function PracticePage() {
                             </motion.button>
                         </div>
 
-                        {/* Group 3: Toggles */}
+                        {/* Group 3: Toggles & Timer Control */}
                         <div className="flex-none flex items-end justify-end gap-3 pb-0.5 ml-auto">
+
                             <MetronomeControl />
 
                             <motion.button
@@ -203,8 +262,7 @@ export default function PracticePage() {
                                     }
                 `}
                             >
-                                <span>{showIntervals ? 'Showing Intervals' : 'Showing Notes'}</span>
-                                <div className={`w-1.5 h-1.5 rounded-full ${!showIntervals ? 'bg-accent-primary' : 'bg-border-strong'}`}></div>
+                                <span>{showIntervals ? 'Int' : 'Note'}</span>
                             </motion.button>
                         </div>
                     </div>
@@ -212,7 +270,11 @@ export default function PracticePage() {
 
                 {/* RIGHT: MUSIC PLAYER (Cols 9-12) */}
                 <div className="lg:col-span-4 glass-panel p-6 shadow-sm flex flex-col justify-center">
-                    <MusicPlayer />
+                    <MusicPlayer
+                        activeSong={activeSong}
+                        isTracking={isTracking}
+                        formattedTime={formattedTime}
+                    />
                 </div>
 
             </motion.header>
