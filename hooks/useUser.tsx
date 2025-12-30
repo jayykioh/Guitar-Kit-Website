@@ -3,7 +3,11 @@
 import { useSession } from "next-auth/react";
 
 export function useUser() {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
+
+  const isLoading = status === "loading";
+  const isAuthenticated = status === "authenticated";
+  const isGuest = status === "unauthenticated";
 
   return {
     user: session?.user ? {
@@ -12,6 +16,9 @@ export function useUser() {
       name: session.user.name,
       image: session.user.image,
     } : null,
-    isLoading: status === "loading",
+    isLoading,
+    isAuthenticated,
+    isGuest,
+    update,
   };
 }

@@ -26,6 +26,7 @@ model User {
   favorites        Favorite[]
   practiceSessions PracticeSession[]
   savedSongs       SavedSong[]
+  savedBackingTracks SavedBackingTrack[]
   
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
@@ -138,6 +139,21 @@ model BackingTrack {
   audioUrl  String
   createdAt DateTime @default(now())
 
+  // Relations
+  favoritedBy SavedBackingTrack[]
+
   @@index([songId])
+}
+
+model SavedBackingTrack {
+  id              String       @id @default(cuid())
+  userId          String
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  backingTrackId  String
+  backingTrack    BackingTrack @relation(fields: [backingTrackId], references: [id], onDelete: Cascade)
+  createdAt       DateTime     @default(now())
+
+  @@unique([userId, backingTrackId])
+  @@index([userId])
 }
 

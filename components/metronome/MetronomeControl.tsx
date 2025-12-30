@@ -2,12 +2,69 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useMetronome } from '@/hooks/useMetronome';
 
-export default function MetronomeControl() {
-    const [isPlaying, setIsPlaying] = useState(false);
+interface MetronomeControlProps {
+    syncedBpm?: number | null;
+}
+
+export default function MetronomeControl({ syncedBpm }: MetronomeControlProps) {
     const [bpm, setBpm] = useState(120);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [tempBpm, setTempBpm] = useState(120); // For modal editing
+
+    // Sync BPM when backing track changes
+    useEffect(() => {
+        if (syncedBpm) {
+            setBpm(syncedBpm);
+            setTempBpm(syncedBpm);
+        }
+    }, [syncedBpm]);
+
+    // Web Audio Metronome Hook
+    const { isPlaying, start, stop, toggle } = useMetronome({ bpm });
+
+    // Handle Keyboard Shortcuts (Arrow Up/Down for BPM, Space for toggle)
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) return;
+
+            // Only handle if Focus Mode or generally active?
+            // User requested global Metronome shortcuts.
+            // CAUTION: Spacebar might conflict with MusicPlayer. 
+            // MusicPlayer usually handles Space, but if focused on Metronome... or global?
+            // "Keyboard support (Space: play/pause...)" might mean global.
+            // Let's implement global but be mindful of conflicts. 
+            // Maybe only Active when Metronome is explicitly "focused" or Modal is open? 
+            // Or maybe just Arrow Keys + explicit toggle. 
+
+            // Re-reading: "Keyboard support (Space: play/pause, Arrow Up/Down: BPM)"
+
+            if (isModalOpen) {
+                if (e.key === 'Enter') handleConfirm();
+                if (e.key === 'Escape') handleCancel();
+                if (e.key === ' ') {
+                    e.preventDefault();
+                    toggle();
+                }
+                return;
+            }
+
+            // Global Shortcuts (careful with overlaps)
+            // Arrow Up/Down -> BPM +/- 5
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setBpm(prev => Math.min(prev + 5, 300));
+            }
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setBpm(prev => Math.max(prev - 5, 30));
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isModalOpen]);
 
     // Handle Modal Open
     const openModal = () => {
@@ -19,8 +76,7 @@ export default function MetronomeControl() {
     const handleConfirm = () => {
         setBpm(tempBpm);
         setIsModalOpen(false);
-        setIsPlaying(true); // Auto-start on confirm? Or just set? "Playing (active)" state implies we might want to start.
-        // User request: "After BPM is selected... display chosen BPM... button visually indicate playing/stopped"
+        if (!isPlaying) start();
     };
 
     // Handle Cancel
@@ -33,12 +89,9 @@ export default function MetronomeControl() {
     const decrement = () => setTempBpm(prev => Math.max(prev - 1, 30));
     const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => setTempBpm(Number(e.target.value));
 
-    // Handle Toggle Play (if we want direct access without modal? User said "When click... open modal". 
-    // But once setup, clicking again to stop is standard. 
-    // I will split the button: Icon (Toggle) | Text (Settings/Modal))
     const togglePlay = (e: React.MouseEvent) => {
         e.stopPropagation();
-        setIsPlaying(!isPlaying);
+        toggle();
     };
 
     return (

@@ -14,8 +14,8 @@ export async function GET(request: Request) {
 
         if (genre && genre !== 'all') {
             whereClause.genre = {
-                equals: genre,
-                mode: 'insensitive' // Flexible matching
+                contains: genre,
+                mode: 'insensitive'
             };
         }
 

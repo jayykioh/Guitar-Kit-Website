@@ -29,6 +29,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             },
             async authorize(credentials) {
                 if (!credentials?.email || !credentials?.password) {
+                    console.log("[Auth] Missing credentials");
                     return null
                 }
 
@@ -43,8 +44,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     }
                 })
 
-                if (!user || !user.password) {
-                    return null
+                if (!user) {
+                    console.log("[Auth] User not found:", credentials.email);
+                    return null;
+                }
+
+                if (!user.password) {
+                    console.log("[Auth] User has no password (OAuth?):", credentials.email);
+                    return null;
                 }
 
                 const isPasswordValid = await bcrypt.compare(
@@ -53,8 +60,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 )
 
                 if (!isPasswordValid) {
+                    console.log("[Auth] Invalid password for:", credentials.email);
                     return null
                 }
+
+                console.log("[Auth] Login successful:", user.email);
 
                 return {
                     id: user.id,
@@ -66,9 +76,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }),
     ],
     callbacks: {
-        async jwt({ token, user }) {
+        async jwt({ token, user, trigger, session }) {
             if (user) {
                 token.id = user.id
+            }
+            if (trigger === "update" && session?.name) {
+                token.name = session.name;
             }
             return token
         },

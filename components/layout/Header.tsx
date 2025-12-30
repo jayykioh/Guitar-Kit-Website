@@ -7,17 +7,22 @@ import { motion, LayoutGroup } from 'framer-motion';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { useUser } from '@/hooks/useUser';
+import { HeaderSkeleton } from '@/components/ui/HeaderSkeleton';
 import { UserMenu } from '@/components/ui/UserMenu';
 
 export default function Header() {
     const pathname = usePathname();
     const { theme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
-    const { user } = useUser();
+    const { user, isLoading } = useUser();
 
     useEffect(() => {
         setMounted(true);
     }, []);
+
+    if (!mounted || isLoading) {
+        return <HeaderSkeleton />;
+    }
 
     const navItems = [
         { name: 'Dashboard', href: '/dashboard' },
@@ -30,13 +35,9 @@ export default function Header() {
             <div className="w-full max-w-[1400px] px-4 md:px-6 flex items-center justify-between">
 
                 {/* Left: Brand */}
-                <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                    <div className="w-8 h-8 rounded-lg bg-accent-primary flex items-center justify-center text-bg-page font-bold shadow-glow">
-                        G
-                    </div>
-                    <span className="text-lg font-bold text-text-primary tracking-tight hidden md:block">
-                        GuitArt
-                    </span>
+                <Link href="/" className="flex items-baseline gap-[1px] hover:opacity-80 transition-opacity select-none">
+                    <span className="text-2xl font-bold text-text-primary tracking-tighter">Guit</span>
+                    <span className="text-2xl font-black italic text-transparent bg-clip-text bg-gradient-to-r from-accent-primary to-blue-600 tracking-tighter pr-1">Art</span>
                 </Link>
 
                 {/* Center: Navigation (Apple-style Sliding Segmented Control) */}
@@ -84,44 +85,44 @@ export default function Header() {
                         className="w-10 h-10 flex items-center justify-center rounded-full text-text-secondary hover:bg-bg-surface-hover hover:text-text-primary transition-all relative overflow-hidden"
                         aria-label="Toggle Theme"
                     >
-                        {mounted ? (
-                            <div className="relative w-5 h-5 flex items-center justify-center">
-                                {/* Sun Icon (Visible in Light) */}
-                                <motion.div
-                                    initial={false}
-                                    animate={{
-                                        scale: theme === 'dark' ? 0.5 : 1,
-                                        rotate: theme === 'dark' ? 90 : 0,
-                                        opacity: theme === 'dark' ? 0 : 1
-                                    }}
-                                    transition={{ duration: 0.25, ease: "easeInOut" }}
-                                    className="absolute inset-0 origin-center flex items-center justify-center"
-                                >
-                                    <span className="material-symbols-outlined text-[20px]">light_mode</span>
-                                </motion.div>
+                        <div className="relative w-5 h-5 flex items-center justify-center">
+                            {/* Sun Icon (Visible in Light) */}
+                            <motion.div
+                                initial={false}
+                                animate={{
+                                    scale: theme === 'dark' ? 0.5 : 1,
+                                    rotate: theme === 'dark' ? 90 : 0,
+                                    opacity: theme === 'dark' ? 0 : 1
+                                }}
+                                transition={{ duration: 0.25, ease: "easeInOut" }}
+                                className="absolute inset-0 origin-center flex items-center justify-center"
+                            >
+                                <span className="material-symbols-outlined text-[20px]">light_mode</span>
+                            </motion.div>
 
-                                {/* Moon Icon (Visible in Dark) */}
-                                <motion.div
-                                    initial={false}
-                                    animate={{
-                                        scale: theme === 'dark' ? 1 : 0.5,
-                                        rotate: theme === 'dark' ? 0 : -90,
-                                        opacity: theme === 'dark' ? 1 : 0
-                                    }}
-                                    transition={{ duration: 0.25, ease: "easeInOut" }}
-                                    className="absolute inset-0 origin-center flex items-center justify-center"
-                                >
-                                    <span className="material-symbols-outlined text-[20px] filled" style={{ fontVariationSettings: "'FILL' 1" }}>dark_mode</span>
-                                </motion.div>
-                            </div>
-                        ) : (
-                            <div className="w-5 h-5 bg-border-subtle/30 rounded-full animate-pulse"></div>
-                        )}
+                            {/* Moon Icon (Visible in Dark) */}
+                            <motion.div
+                                initial={false}
+                                animate={{
+                                    scale: theme === 'dark' ? 1 : 0.5,
+                                    rotate: theme === 'dark' ? 0 : -90,
+                                    opacity: theme === 'dark' ? 1 : 0
+                                }}
+                                transition={{ duration: 0.25, ease: "easeInOut" }}
+                                className="absolute inset-0 origin-center flex items-center justify-center"
+                            >
+                                <span className="material-symbols-outlined text-[20px] filled" style={{ fontVariationSettings: "'FILL' 1" }}>dark_mode</span>
+                            </motion.div>
+                        </div>
                     </button>
 
                     {/* User Profile or Login */}
                     {user ? (
-                        <UserMenu user={user} />
+                        <UserMenu user={{
+                            name: user.name ?? null,
+                            email: user.email,
+                            image: user.image ?? null
+                        }} />
                     ) : (
                         pathname !== '/login' && (
                             <Link href="/login">

@@ -87,9 +87,16 @@
     --color-accent-primary: var(--accent-primary);
     --color-accent-surface: var(--accent-surface);
 
+    /* Footer Specific Aliases to match user snippet */
+    --color-primary: #13ec5b;
+    --color-background-dark: #050505;
+    --color-surface-dark: #111111;
+
     --color-fretboard-bg: var(--fretboard-bg);
 
     --shadow-glow: var(--glow-accent);
+
+    --font-display: "Spline Sans", sans-serif;
 }
 
 body {

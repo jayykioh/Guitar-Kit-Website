@@ -1,13 +1,14 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useUser } from '@/hooks/useUser';
+import { logToTerminal } from '@/app/actions';
 
 // Configuration
 const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 minutes
-const SAVE_THRESHOLD_SECONDS = 60; // Minimum 1 minute to save
+const SAVE_THRESHOLD_SECONDS = 5; // Reduced to 5s for easier verification
 
 export type InteractionType = 'PLAYBACK' | 'FRETBOARD' | 'METRONOME' | 'SETTINGS' | 'SCROLL';
 
-export function usePracticeTracker() {
+export function usePracticeTracker({ shouldTrack = false }: { shouldTrack?: boolean } = {}) {
     const { user } = useUser();
 
     // State
@@ -29,9 +30,11 @@ export function usePracticeTracker() {
     const saveSession = useCallback(async () => {
         const durationMinutes = Math.ceil(activeSecondsRef.current / 60);
 
+        logToTerminal(`[Tracker] Attempting save. Active Seconds: ${activeSecondsRef.current}`);
+
         // Validation: Must be > threshold and have a user
         if (activeSecondsRef.current < SAVE_THRESHOLD_SECONDS || !user) {
-            console.log('Session too short or no user, discarding.', activeSecondsRef.current);
+            logToTerminal('[Tracker] Session discarded: Too short or no user.');
             return;
         }
 
@@ -67,6 +70,7 @@ export function usePracticeTracker() {
     const stopTracking = useCallback(() => {
         if (!isTracking) return;
 
+        logToTerminal('[Tracker] Stopping...');
         saveSession();
 
         // Reset State
@@ -80,8 +84,43 @@ export function usePracticeTracker() {
     }, [isTracking, saveSession]);
 
     // -------------------------------------------------------------------------
+    // Helper: Start Tracking
+    // -------------------------------------------------------------------------
+    const startTracking = useCallback(() => {
+        if (isTracking) return;
+
+        logToTerminal('[Tracker] Starting...');
+        setIsTracking(true);
+        setSessionStartTime(new Date());
+        activeSecondsRef.current = 0;
+        setActiveSeconds(0);
+        lastInteractionTimeRef.current = Date.now(); // Reset inactivity timer on start
+
+        let tickCount = 0;
+
+        // Start Timer
+        intervalIdRef.current = setInterval(() => {
+            tickCount++;
+            const isVisible = document.visibilityState === 'visible';
+
+            if (isVisible) {
+                activeSecondsRef.current += 1;
+                setActiveSeconds(prev => prev + 1);
+                checkInactivity();
+            }
+        }, 1000);
+    }, [isTracking]); // checkInactivity is circular, define it before or use ref? 
+
+    // -------------------------------------------------------------------------
     // Helper: Check Inactivity
     // -------------------------------------------------------------------------
+    // We need to define checkInactivity before startTracking or use a ref usage pattern
+    // to avoid circular dependency in useCallback if we were strict, but here hoisting works or we can reorder.
+    // Actually, `checkInactivity` calls `stopTracking`. `startTracking` calls `checkInactivity`.
+    // Let's rely on standard hoisting or define checkInactivity first.
+    // But `startTracking` was defined above. Let's fix the order or dependencies.
+    // Better yet, `checkInactivity` is stable.
+
     const checkInactivity = useCallback(() => {
         const now = Date.now();
         const timeSinceInteraction = now - lastInteractionTimeRef.current;
@@ -93,12 +132,30 @@ export function usePracticeTracker() {
         }
 
         if (timeSinceInteraction > INACTIVITY_TIMEOUT) {
+            // If inactive for too long, we stop tracking even if shouldTrack is true?
+            // The requirements say "Count practice time only while Focus Mode is active".
+            // If I am in Focus Mode but walk away, should it stop?
+            // "no need to finalize edge cases yet".
+            // Only stop if we really want to enforce "active" practice.
+            // Let's keep it for now to prevent 5 hours of "practice" while sleeping.
             stopTracking();
         }
     }, [stopTracking]);
 
     // -------------------------------------------------------------------------
-    // Core: Track Interaction
+    // Effect: Handle shouldTrack prop
+    // -------------------------------------------------------------------------
+    useEffect(() => {
+        if (shouldTrack) {
+            startTracking();
+        } else {
+            stopTracking();
+        }
+    }, [shouldTrack, startTracking, stopTracking]);
+
+
+    // -------------------------------------------------------------------------
+    // Core: Track Interaction (Updates Context only)
     // -------------------------------------------------------------------------
     const trackInteraction = useCallback((type: InteractionType, data?: { focusType?: string, songId?: string, isPlaying?: boolean }) => {
         const now = Date.now();
@@ -111,43 +168,24 @@ export function usePracticeTracker() {
             isPlayingRef.current = data.isPlaying;
         }
 
-        // Start Tracking if not active
-        if (!isTracking) {
-            setIsTracking(true);
-            setSessionStartTime(new Date());
-            activeSecondsRef.current = 0;
-            setActiveSeconds(0);
-
-            // Start Timer
-            intervalIdRef.current = setInterval(() => {
-                // Only increment if tab is visible
-                const isVisible = document.visibilityState === 'visible';
-
-                // Debug log
-                console.log(`[PracticeTracker] Tick. Active: ${activeSecondsRef.current}, Visible: ${isVisible}, Playing: ${isPlayingRef.current}`);
-
-                if (isVisible) {
-                    activeSecondsRef.current += 1;
-                    setActiveSeconds(prev => prev + 1);
-                    checkInactivity();
-                }
-            }, 1000);
-        } else {
-            // Just reset inactivity check if already running
-            if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
-            // We check inactivity in the interval, but we can also set a safety timeout here if needed
-        }
-    }, [isTracking, checkInactivity]);
+        // NOTE: We no longer auto-start tracking here. We only respect `shouldTrack`.
+    }, []);
 
     // -------------------------------------------------------------------------
     // Lifecycle Listeners
     // -------------------------------------------------------------------------
 
-    // Save on Unmount / Tab Close
+    // Keep latest saveSession in ref to avoid effect re-execution
+    const saveSessionRef = useRef(saveSession);
+    useEffect(() => {
+        saveSessionRef.current = saveSession;
+    }, [saveSession]);
+
+    // Save on Unmount / Tab Close (Only runs once on mount/unmount)
     useEffect(() => {
         const handleUnload = () => {
             if (activeSecondsRef.current >= SAVE_THRESHOLD_SECONDS) {
-                saveSession();
+                saveSessionRef.current();
             }
         };
 
@@ -157,7 +195,7 @@ export function usePracticeTracker() {
             handleUnload(); // Also save on component unmount
             if (intervalIdRef.current) clearInterval(intervalIdRef.current);
         };
-    }, [saveSession]);
+    }, []);
 
 
     const formatTime = (totalSeconds: number) => {

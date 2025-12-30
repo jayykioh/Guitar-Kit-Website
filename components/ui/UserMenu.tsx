@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import { signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 interface UserMenuProps {
     user: {
@@ -15,6 +16,7 @@ interface UserMenuProps {
 
 export function UserMenu({ user, onLogout }: UserMenuProps) {
     const [isOpen, setIsOpen] = useState(false);
+    const router = useRouter();
 
     const handleLogout = async () => {
         setIsOpen(false);
@@ -24,6 +26,11 @@ export function UserMenu({ user, onLogout }: UserMenuProps) {
             // Use NextAuth signOut
             await signOut({ callbackUrl: '/' });
         }
+    };
+
+    const handleNavigation = (path: string) => {
+        setIsOpen(false);
+        router.push(path);
     };
 
     return (
@@ -99,11 +106,7 @@ export function UserMenu({ user, onLogout }: UserMenuProps) {
                             {/* Menu Items */}
                             <div className="py-2">
                                 <button
-                                    onClick={() => {
-                                        setIsOpen(false);
-                                        // Navigate to dashboard
-                                        window.location.href = '/dashboard';
-                                    }}
+                                    onClick={() => handleNavigation('/dashboard')}
                                     className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-bg-surface-hover transition-colors text-left group"
                                 >
                                     <span className="material-symbols-outlined text-[20px] text-text-secondary group-hover:text-accent-primary">
@@ -113,10 +116,7 @@ export function UserMenu({ user, onLogout }: UserMenuProps) {
                                 </button>
 
                                 <button
-                                    onClick={() => {
-                                        setIsOpen(false);
-                                        window.location.href = '/practice';
-                                    }}
+                                    onClick={() => handleNavigation('/practice')}
                                     className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-bg-surface-hover transition-colors text-left group"
                                 >
                                     <span className="material-symbols-outlined text-[20px] text-text-secondary group-hover:text-accent-primary">
@@ -126,10 +126,7 @@ export function UserMenu({ user, onLogout }: UserMenuProps) {
                                 </button>
 
                                 <button
-                                    onClick={() => {
-                                        setIsOpen(false);
-                                        window.location.href = '/songs';
-                                    }}
+                                    onClick={() => handleNavigation('/songs')}
                                     className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-bg-surface-hover transition-colors text-left group"
                                 >
                                     <span className="material-symbols-outlined text-[20px] text-text-secondary group-hover:text-accent-primary">
@@ -152,10 +149,7 @@ export function UserMenu({ user, onLogout }: UserMenuProps) {
                                 </button>
 
                                 <button
-                                    onClick={() => {
-                                        setIsOpen(false);
-                                        alert('Profile page coming soon!');
-                                    }}
+                                    onClick={() => handleNavigation('/profile')}
                                     className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-bg-surface-hover transition-colors text-left group"
                                 >
                                     <span className="material-symbols-outlined text-[20px] text-text-secondary group-hover:text-accent-primary">

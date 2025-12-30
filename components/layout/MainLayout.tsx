@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import Header from './Header';
+import Footer from '@/components/layout/Footer';
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -14,13 +15,14 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
         return <>{children}</>;
     }
 
-    // Other Pages: Render Header + Content with padding
+    // Other Pages: Render Header + Content with padding + Footer
     return (
-        <>
+        <div className="flex flex-col min-h-screen">
             <Header />
-            <div className="pt-16">
+            <main className="flex-grow pt-16">
                 {children}
-            </div>
-        </>
+            </main>
+            <Footer />
+        </div>
     );
 }
