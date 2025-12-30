@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
         const userId = session.user.id;
 
         // Check if already favorite
-        const existing = await prisma.savedBackingTrack.findUnique({
+        const existing = await prisma.backingTrack.findUnique({
             where: {
                 userId_backingTrackId: {
                     userId,
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 
         if (existing) {
             // Toggle OFF
-            await prisma.savedBackingTrack.delete({
+            await prisma.backingTrack.delete({
                 where: {
                     userId_backingTrackId: {
                         userId,
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ isFavorite: false });
         } else {
             // Toggle ON
-            await prisma.savedBackingTrack.create({
+            await prisma.backingTrack.create({
                 data: {
                     userId,
                     backingTrackId: trackId
@@ -61,12 +61,12 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const favorites = await prisma.savedBackingTrack.findMany({
+        const favorites = await prisma.backingTrack.findMany({
             where: { userId: session.user.id },
             select: { backingTrackId: true }
         });
 
-        return NextResponse.json(favorites.map(f => f.backingTrackId));
+        return NextResponse.json((favorites as any[]).map(f => f.backingTrackId));
     } catch (error) {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }

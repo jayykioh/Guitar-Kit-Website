@@ -528,36 +528,64 @@ export default function MusicPlayer({ activeSong, onInteraction, onTrackSelect, 
                                         </div>
 
                                         {/* Library List */}
-                                        <div className="flex-1 overflow-y-auto p-4 pt-0 space-y-1 scrollbar-hide">
-                                            {tracks.map(track => (
-                                                <button
-                                                    key={track.id}
-                                                    onClick={() => playTrack(track)}
-                                                    className={`w-full group flex items-center gap-3 p-3 rounded-xl cursor-pointer relative overflow-hidden transition-all ${activeTrack?.id === track.id ? 'bg-gradient-to-r from-[#13ec5b]/10 to-transparent border border-[#13ec5b]/20' : 'hover:bg-white/5 border border-transparent hover:border-white/5'}`}
-                                                >
-                                                    {activeTrack?.id === track.id && <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#13ec5b]"></div>}
-
-                                                    <div className={`size-10 rounded-lg flex items-center justify-center shrink-0 relative z-10 ${activeTrack?.id === track.id ? 'bg-black/20 text-[#13ec5b]' : 'bg-black/20 text-white/20 group-hover:text-white'}`}>
-                                                        {activeTrack?.id === track.id ? (
-                                                            <span className="material-symbols-outlined text-xl animate-pulse">equalizer</span>
-                                                        ) : (
-                                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
-                                                        )}
-                                                    </div>
-
-                                                    <div className="flex-1 min-w-0 z-10 text-left">
-                                                        <div className={`text-sm font-bold truncate ${activeTrack?.id === track.id ? 'text-[#13ec5b]' : 'text-white/80 group-hover:text-white'}`}>
-                                                            {track.name}
+                                        <div className="flex-1 overflow-y-auto p-2 scrollbar-hide space-y-0.5">
+                                            {tracks.map((track, index) => {
+                                                const isActive = activeTrack?.id === track.id;
+                                                return (
+                                                    <button
+                                                        key={track.id}
+                                                        onClick={() => playTrack(track)}
+                                                        className={`
+                                                            w-full group flex items-center gap-3 p-2 rounded-lg transition-colors duration-200
+                                                            text-left relative
+                                                            ${isActive ? 'bg-white/10' : 'hover:bg-white/5 bg-transparent'}
+                                                        `}
+                                                    >
+                                                        {/* Strat Layout: Icon/Index */}
+                                                        <div className="relative size-8 shrink-0 flex items-center justify-center">
+                                                            {isActive ? (
+                                                                isPlaying ? (
+                                                                    <div className="text-[#13ec5b] animate-pulse">
+                                                                        <span className="material-symbols-outlined text-[20px]">equalizer</span>
+                                                                    </div>
+                                                                ) : (
+                                                                    <span className="material-symbols-outlined text-[20px] text-[#13ec5b]">pause</span>
+                                                                )
+                                                            ) : (
+                                                                <>
+                                                                    <span className="text-white/30 font-medium text-xs font-mono group-hover:hidden">
+                                                                        {(index + 1).toString().padStart(2, '0')}
+                                                                    </span>
+                                                                    <span className="hidden group-hover:block text-white">
+                                                                        <span className="material-symbols-outlined text-[20px]">play_arrow</span>
+                                                                    </span>
+                                                                </>
+                                                            )}
                                                         </div>
-                                                        <div className={`text-xs truncate flex items-center gap-1 ${activeTrack?.id === track.id ? 'text-[#13ec5b]/70' : 'text-white/40'}`}>
-                                                            <span>{track.genre}</span>
-                                                            <span className={`w-0.5 h-0.5 rounded-full ${activeTrack?.id === track.id ? 'bg-[#13ec5b]/50' : 'bg-white/20'}`}></span>
-                                                            <span>{track.bpm} BPM</span>
+
+                                                        {/* Middle: Info */}
+                                                        <div className="flex-1 min-w-0 flex flex-col justify-center">
+                                                            <span className={`text-sm font-semibold truncate leading-tight transition-colors ${isActive ? 'text-[#13ec5b]' : 'text-white/90 group-hover:text-white'}`}>
+                                                                {track.name}
+                                                            </span>
+                                                            <div className="flex items-center gap-2 mt-0.5">
+                                                                <span className={`text-[11px] font-medium truncate ${isActive ? 'text-white/70' : 'text-white/40 group-hover:text-white/50'}`}>
+                                                                    {track.genre}
+                                                                </span>
+                                                                <span className="text-white/20 text-[10px]">•</span>
+                                                                <span className={`text-[11px] font-medium px-1.5 py-0.5 rounded bg-white/5 ${isActive ? 'text-white/70' : 'text-white/40 group-hover:text-white/50'}`}>
+                                                                    {track.bpm} BPM
+                                                                </span>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div className={`text-xs font-mono shrink-0 z-10 ${activeTrack?.id === track.id ? 'text-[#13ec5b]/60' : 'text-white/30'}`}>4:12</div>
-                                                </button>
-                                            ))}
+
+                                                        {/* End: Duration */}
+                                                        <span className="text-xs font-medium text-white/20 group-hover:text-white/40 transition-colors pr-2">
+                                                            4:12
+                                                        </span>
+                                                    </button>
+                                                );
+                                            })}
                                         </div>
                                     </motion.div>
                                 )}

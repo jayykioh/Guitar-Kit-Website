@@ -16,10 +16,12 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
     }
 
     // Other Pages: Render Header + Content with padding + Footer
+    const isHomePage = pathname === '/';
+
     return (
         <div className="flex flex-col min-h-screen">
             <Header />
-            <main className="flex-grow pt-16">
+            <main className={`flex-grow ${isHomePage ? '' : 'pt-16'}`}>
                 {children}
             </main>
             <Footer />

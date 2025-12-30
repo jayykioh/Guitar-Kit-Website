@@ -32,27 +32,30 @@ export async function GET(request: Request) {
                 practiceSessions: {
                     select: { duration: true }
                 }
-            },
+            } as any,
         });
 
         if (!user) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        // Calculate stats
-        const totalPractice = user.practiceSessions.reduce((acc, curr) => acc + curr.duration, 0);
-        const totalSessions = user.practiceSessions.length;
+        // TypeScript workaround: Prisma include types not always recognized
+        const userWithIncludes = user as any;
 
-        // Extract relevant profile data
+        // Calculate stats
+        const totalPractice = userWithIncludes.practiceSessions.reduce((acc: number, curr: any) => acc + curr.duration, 0);
+        const totalSessions = userWithIncludes.practiceSessions.length;
+
+        // Extract and flatten related data
         const profile = {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            image: user.image,
-            createdAt: user.createdAt,
-            favorites: user.favorites,
-            savedSongs: user.savedSongs.map(s => s.song), // Flatten structure
-            savedBackingTracks: user.savedBackingTracks.map(t => t.backingTrack),
+            id: userWithIncludes.id,
+            name: userWithIncludes.name,
+            email: userWithIncludes.email,
+            image: userWithIncludes.image,
+            createdAt: userWithIncludes.createdAt,
+            favorites: userWithIncludes.favorites,
+            savedSongs: userWithIncludes.savedSongs.map((s: any) => s.song),
+            savedBackingTracks: userWithIncludes.savedBackingTracks.map((t: any) => t.backingTrack),
             stats: {
                 totalPractice,
                 totalSessions

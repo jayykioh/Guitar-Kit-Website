@@ -2,10 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion, LayoutGroup } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useUser } from '@/hooks/useUser';
 import { HeaderSkeleton } from '@/components/ui/HeaderSkeleton';
 import { UserMenu } from '@/components/ui/UserMenu';
@@ -16,19 +16,41 @@ export default function Header() {
     const [mounted, setMounted] = useState(false);
     const { user, isLoading } = useUser();
 
-    useEffect(() => {
-        setMounted(true);
-    }, []);
-
-    if (!mounted || isLoading) {
-        return <HeaderSkeleton />;
-    }
+    // Hooks must be called before any return
+    const navRef = useRef<HTMLElement>(null);
+    const itemRefs = useRef<Map<string, HTMLAnchorElement | null>>(new Map());
+    const [pillStyle, setPillStyle] = useState({ left: 0, width: 0, opacity: 0 });
 
     const navItems = [
         { name: 'Dashboard', href: '/dashboard' },
         { name: 'Practice', href: '/practice' },
         { name: 'Songs', href: '/songs' },
     ];
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    useEffect(() => {
+        const activeItem = navItems.find(item =>
+            pathname === item.href || (item.href === '/' && pathname === '/')
+        );
+
+        if (activeItem && navRef.current) {
+            const el = itemRefs.current.get(activeItem.href);
+            if (el) {
+                setPillStyle({
+                    left: el.offsetLeft,
+                    width: el.offsetWidth,
+                    opacity: 1
+                });
+            }
+        }
+    }, [pathname, mounted]);
+
+    if (!mounted || isLoading) {
+        return <HeaderSkeleton />;
+    }
 
     return (
         <header className="fixed top-0 left-0 w-full h-16 z-50 bg-bg-page/80 backdrop-blur-md border-b border-border-subtle flex items-center justify-center transition-colors duration-300">
@@ -41,40 +63,42 @@ export default function Header() {
                 </Link>
 
                 {/* Center: Navigation (Apple-style Sliding Segmented Control) */}
-                <nav className="absolute left-1/2 -translate-x-1/2 hidden md:flex items-center p-1 bg-bg-surface/50 backdrop-blur-sm rounded-full border border-border-subtle shadow-sm">
-                    <LayoutGroup>
-                        {navItems.map((item) => {
-                            const isActive = pathname === item.href || (item.href === '/' && pathname === '/');
-                            return (
-                                <Link
-                                    key={item.name}
-                                    href={item.href}
-                                    className={`
-                                        relative px-6 py-1.5 text-sm font-medium rounded-full transition-colors duration-200 z-10
-                                        ${isActive ? 'text-text-primary' : 'text-text-secondary hover:text-text-primary'}
-                                    `}
-                                >
-                                    {/* Text Label */}
-                                    <span className="relative z-10">{item.name}</span>
+                <nav
+                    ref={navRef}
+                    className="absolute left-1/2 -translate-x-1/2 hidden md:flex items-center p-1 bg-bg-surface/50 backdrop-blur-sm rounded-full border border-border-subtle shadow-sm isolate"
+                >
+                    <motion.div
+                        className="absolute bg-bg-surface-hover rounded-full shadow-sm border border-border-subtle/50 pointer-events-none"
+                        initial={false}
+                        animate={{
+                            left: pillStyle.left,
+                            width: pillStyle.width,
+                            opacity: pillStyle.opacity
+                        }}
+                        transition={{
+                            type: "spring",
+                            stiffness: 500,
+                            damping: 30
+                        }}
+                        style={{ height: 'calc(100% - 8px)', top: '4px', zIndex: -1 }}
+                    />
 
-                                    {/* Sliding Active Background Pill */}
-                                    {isActive && (
-                                        <motion.div
-                                            layoutId="activeTab"
-                                            className="absolute inset-0 bg-bg-surface-hover rounded-full shadow-sm border border-border-subtle/50"
-                                            initial={false}
-                                            transition={{
-                                                type: "spring",
-                                                stiffness: 500,
-                                                damping: 30
-                                            }}
-                                            style={{ zIndex: 0 }}
-                                        />
-                                    )}
-                                </Link>
-                            )
-                        })}
-                    </LayoutGroup>
+                    {navItems.map((item) => {
+                        const isActive = pathname === item.href || (item.href === '/' && pathname === '/');
+                        return (
+                            <Link
+                                key={item.name}
+                                href={item.href}
+                                ref={(el: HTMLAnchorElement | null) => { itemRefs.current.set(item.href, el); }}
+                                className={`
+                                    relative px-6 py-1.5 text-sm font-medium rounded-full transition-colors duration-200 z-10
+                                    ${isActive ? 'text-text-primary' : 'text-text-secondary hover:text-text-primary'}
+                                `}
+                            >
+                                <span className="relative z-10">{item.name}</span>
+                            </Link>
+                        )
+                    })}
                 </nav>
 
                 {/* Right: Actions */}
