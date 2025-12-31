@@ -67,7 +67,7 @@ export async function GET(req: NextRequest) {
             select: { backingTrackId: true }
         });
 
-        return NextResponse.json(favorites.map(f => f.backingTrackId));
+        return NextResponse.json(favorites.map((f: { backingTrackId: string }) => f.backingTrackId));
     } catch (error) {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
