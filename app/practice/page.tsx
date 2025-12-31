@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, Suspense } from 'react';
 import { motion, Variants, AnimatePresence } from 'framer-motion';
 import { useSearchParams } from 'next/navigation';
 import { getScale, getScaleById, getAllScales } from '@/lib/music/scales';
@@ -24,7 +24,7 @@ import { usePracticeGuard } from '@/hooks/usePracticeGuard';
 
 const KEYS: NoteName[] = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
-export default function PracticePage() {
+function PracticePageContent() {
     // URL Params
     const searchParams = useSearchParams();
     const songId = searchParams.get('songId');
@@ -457,5 +457,20 @@ export default function PracticePage() {
                 </div>
             </motion.main>
         </motion.div>
+    );
+}
+
+export default function PracticePage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-bg-page flex items-center justify-center">
+                <div className="text-center">
+                    <div className="w-16 h-16 border-4 border-accent-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-text-secondary">Loading Practice Engine...</p>
+                </div>
+            </div>
+        }>
+            <PracticePageContent />
+        </Suspense>
     );
 }

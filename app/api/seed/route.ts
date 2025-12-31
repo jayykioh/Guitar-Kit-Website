@@ -27,35 +27,33 @@ export async function POST() {
             },
         });
 
-        // Create sample songs
+        // Create sample songs (Song model doesn't have userId - it's a global catalog)
         const songs = [
-            { title: 'Wonderwall', artist: 'Oasis', difficulty: 'Easy', genre: 'Rock', key: 'Em', bpm: 87, progress: 85 },
-            { title: 'Hotel California', artist: 'Eagles', difficulty: 'Intermediate', genre: 'Rock', key: 'Bm', bpm: 74, progress: 60 },
-            { title: 'Neon', artist: 'John Mayer', difficulty: 'Hard', genre: 'Pop', key: 'C', bpm: 145, progress: 30 },
+            { title: 'Wonderwall', artist: 'Oasis', difficulty: 'Beginner', genre: 'Rock', key: 'Em', bpm: 87 },
+            { title: 'Hotel California', artist: 'Eagles', difficulty: 'Intermediate', genre: 'Rock', key: 'Bm', bpm: 74 },
+            { title: 'Neon', artist: 'John Mayer', difficulty: 'Advanced', genre: 'Pop', key: 'C', bpm: 145 },
         ];
 
+        const createdSongs = [];
         for (const songData of songs) {
-            await prisma.song.upsert({
+            const song = await prisma.song.upsert({
                 where: {
-                    userId_title_artist: {
-                        userId: user.id,
-                        title: songData.title,
-                        artist: songData.artist,
-                    },
+                    id: `seed-${songData.title.toLowerCase().replace(/\s+/g, '-')}`
                 },
-                update: {},
+                update: songData,
                 create: {
-                    userId: user.id,
+                    id: `seed-${songData.title.toLowerCase().replace(/\s+/g, '-')}`,
                     ...songData,
                 },
             });
+            createdSongs.push(song);
         }
 
-        // Create practice sessions
+        // Create practice sessions (use focusType instead of focus)
         const sessions = [
-            { duration: 45, focus: 'A Minor Pentatonic', daysAgo: 0 },
-            { duration: 30, focus: 'Hotel California Solo', daysAgo: 1 },
-            { duration: 60, focus: 'Chord Transitions', daysAgo: 2 },
+            { duration: 45, focusType: 'SCALES', daysAgo: 0 },
+            { duration: 30, focusType: 'SONGS', daysAgo: 1, songId: createdSongs[1]?.id },
+            { duration: 60, focusType: 'TECHNIQUE', daysAgo: 2 },
         ];
 
         for (const sessionData of sessions) {
@@ -63,7 +61,9 @@ export async function POST() {
                 data: {
                     userId: user.id,
                     duration: sessionData.duration,
-                    focus: sessionData.focus,
+                    focusType: sessionData.focusType,
+                    songId: sessionData.songId || null,
+                    notes: null,
                     createdAt: new Date(Date.now() - sessionData.daysAgo * 24 * 60 * 60 * 1000),
                 },
             });

@@ -22,10 +22,10 @@ function frequencyToNote(frequency: number): { note: string; cents: number; octa
     const semitones = 12 * Math.log2(frequency / A4);
     const noteIndex = Math.round(semitones) + 9; // +9 because A is index 9
     const cents = Math.floor((semitones - Math.round(semitones)) * 100);
-    
+
     const octave = Math.floor(noteIndex / 12) + 4;
     const note = NOTE_NAMES[(noteIndex % 12 + 12) % 12];
-    
+
     return { note, cents, octave };
 }
 
@@ -48,7 +48,7 @@ function autoCorrelate(buffer: Float32Array, sampleRate: number): number {
         rms += buffer[i] * buffer[i];
     }
     rms = Math.sqrt(rms / size);
-    
+
     // If signal is too weak, return -1 (no pitch detected)
     if (rms < 0.01) return -1;
 
@@ -56,13 +56,13 @@ function autoCorrelate(buffer: Float32Array, sampleRate: number): number {
     let lastCorrelation = 1;
     for (let offset = 1; offset < maxSamples; offset++) {
         let correlation = 0;
-        
+
         for (let i = 0; i < maxSamples; i++) {
             correlation += Math.abs(buffer[i] - buffer[i + offset]);
         }
-        
+
         correlation = 1 - (correlation / maxSamples);
-        
+
         if (correlation > 0.9 && correlation > lastCorrelation) {
             const foundGoodCorrelation = correlation > bestCorrelation;
             if (foundGoodCorrelation) {
@@ -97,13 +97,12 @@ export function useTuner() {
         try {
             setState(prev => ({ ...prev, error: null }));
 
-            const stream = await navigator.mediaDevices.getUserMedia({ 
+            const stream = await navigator.mediaDevices.getUserMedia({
                 audio: {
                     echoCancellation: false,
                     autoGainControl: false,
-                    noiseSuppression: false,
-                    latency: 0
-                } 
+                    noiseSuppression: false
+                }
             });
 
             if (!audioContextRef.current) {
@@ -133,7 +132,7 @@ export function useTuner() {
                     // Filter out unrealistic frequencies (guitar range: ~80Hz - 1200Hz)
                     if (frequency >= 70 && frequency <= 1400) {
                         const { note, cents } = frequencyToNote(frequency);
-                        
+
                         setState(prev => ({
                             ...prev,
                             note,
