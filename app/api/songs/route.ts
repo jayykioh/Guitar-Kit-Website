@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     });
 
     // 2. Map Songs to unified format
-    const formattedSongs = songs.map((song) => ({
+    const formattedSongs = songs.map((song: any) => ({
       id: song.id,
       title: song.title,
       artist: song.artist,
