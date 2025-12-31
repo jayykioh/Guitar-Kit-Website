@@ -66,7 +66,7 @@ export async function GET(request: Request) {
 
     const todayDuration = todayStats._sum.duration || 0;
 
-    const recentSessions = recentSessionsData.map((session) => ({
+    const recentSessions = recentSessionsData.map((session: any) => ({
       date: session.createdAt.toISOString().split('T')[0],
       duration: session.duration,
       focus: session.focusType || 'General practice',
