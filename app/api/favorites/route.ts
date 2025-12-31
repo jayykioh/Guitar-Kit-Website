@@ -5,7 +5,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
-    
+
     if (!userId) {
       return NextResponse.json({ error: 'userId is required' }, { status: 400 });
     }
@@ -15,7 +15,7 @@ export async function GET(request: Request) {
       orderBy: { createdAt: 'desc' },
     });
 
-    const formattedFavorites = favorites.map((fav) => ({
+    const formattedFavorites = favorites.map((fav: { id: string; scaleId: string; key: string; tuningId: string; notes: string | null; createdAt: Date }) => ({
       id: fav.id,
       scaleId: fav.scaleId,
       key: fav.key,
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
       notes: fav.notes,
       createdAt: fav.createdAt.toISOString(),
     }));
-    
+
     return NextResponse.json(formattedFavorites);
   } catch (error) {
     console.error('Failed to fetch favorites:', error);
@@ -37,9 +37,9 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    
+
     const { userId, scaleId, key, tuningId, notes } = body;
-    
+
     if (!userId || !scaleId || !key || !tuningId) {
       return NextResponse.json(
         { error: 'userId, scaleId, key, and tuningId are required' },
@@ -56,7 +56,7 @@ export async function POST(request: Request) {
         notes: notes || null,
       },
     });
-    
+
     return NextResponse.json(newFavorite, { status: 201 });
   } catch (error) {
     console.error('Failed to create favorite:', error);
@@ -71,17 +71,17 @@ export async function DELETE(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    
+
     if (!id) {
       return NextResponse.json(
         { error: 'Favorite ID is required' },
         { status: 400 }
       );
     }
-    
+
     // TODO: Delete from database via Prisma
     // Example: await prisma.favorite.delete({ where: { id } })
-    
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Failed to delete favorite:', error);
