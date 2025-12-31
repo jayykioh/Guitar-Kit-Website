@@ -72,60 +72,62 @@ export default function DashboardPage() {
             {/* Stats Grid */}
             <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Daily Goal */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.1 }}
-                    className="lg:col-span-2 glass-panel p-8 flex flex-col justify-between gap-6 group hover:border-accent-primary/30 transition-colors"
-                >
-                    <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-4">
-                            <motion.div
-                                whileHover={{ rotate: 180 }}
-                                transition={{ duration: 0.5 }}
-                                className="w-12 h-12 flex items-center justify-center bg-accent-primary/20 rounded-full text-accent-primary cursor-pointer"
-                            >
-                                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66.19-.34 4.86-9.24 4.86-9.24C12.3 3.68 12.45 4 12.45 4h5c.59 0 .58.32.38.66-.2.34-4.86 9.24-4.86 9.24C12.7 14.32 12.55 14 12.55 14h-1.55z" /></svg>
-                            </motion.div>
-                            <div>
-                                <h3 className="font-bold text-xl text-text-primary">Daily Goal</h3>
-                                <p className="text-sm text-text-secondary">Keep the momentum going</p>
+                <Link href="/profile" className="lg:col-span-2">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.1 }}
+                        className="h-full glass-panel p-8 flex flex-col justify-between gap-6 group hover:border-accent-primary/30 transition-colors cursor-pointer"
+                    >
+                        <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-4">
+                                <motion.div
+                                    whileHover={{ rotate: 180 }}
+                                    transition={{ duration: 0.5 }}
+                                    className="w-12 h-12 flex items-center justify-center bg-accent-primary/20 rounded-full text-accent-primary group-hover:bg-accent-primary group-hover:text-white transition-colors"
+                                >
+                                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66.19-.34 4.86-9.24 4.86-9.24C12.3 3.68 12.45 4 12.45 4h5c.59 0 .58.32.38.66-.2.34-4.86 9.24-4.86 9.24C12.7 14.32 12.55 14 12.55 14h-1.55z" /></svg>
+                                </motion.div>
+                                <div>
+                                    <h3 className="font-bold text-xl text-text-primary group-hover:text-accent-primary transition-colors">Daily Goal</h3>
+                                    <p className="text-sm text-text-secondary">Keep the momentum going</p>
+                                </div>
+                            </div>
+                            {isLoading ? (
+                                <div className="h-10 w-20 bg-bg-surface-hover rounded-lg animate-pulse"></div>
+                            ) : (
+                                <span className="text-3xl font-black text-text-primary">
+                                    {stats ? Math.round((stats.dailyProgress / stats.dailyGoal) * 100) : 0}%
+                                </span>
+                            )}
+                        </div>
+                        <div className="flex flex-col gap-3">
+                            <div className="w-full h-4 bg-bg-surface-hover rounded-full overflow-hidden">
+                                {isLoading ? (
+                                    <div className="h-full w-full bg-border-subtle animate-pulse"></div>
+                                ) : (
+                                    <div
+                                        className="h-full bg-accent-primary rounded-full relative shadow-[0_0_20px_var(--accent-primary)] opacity-90 transition-all duration-500"
+                                        style={{ width: `${stats ? Math.min((stats.dailyProgress / stats.dailyGoal) * 100, 100) : 0}%` }}
+                                    ></div>
+                                )}
+                            </div>
+                            <div className="flex justify-between text-sm font-medium text-text-tertiary">
+                                {isLoading ? (
+                                    <>
+                                        <div className="h-4 w-20 bg-bg-surface-hover rounded animate-pulse"></div>
+                                        <div className="h-4 w-20 bg-bg-surface-hover rounded animate-pulse"></div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span>{stats ? `${stats.dailyProgress} mins played` : '0 mins'}</span>
+                                        <span>Target: {stats ? `${stats.dailyGoal} mins` : '45 mins'}</span>
+                                    </>
+                                )}
                             </div>
                         </div>
-                        {isLoading ? (
-                            <div className="h-10 w-20 bg-bg-surface-hover rounded-lg animate-pulse"></div>
-                        ) : (
-                            <span className="text-3xl font-black text-text-primary">
-                                {stats ? Math.round((stats.dailyProgress / stats.dailyGoal) * 100) : 0}%
-                            </span>
-                        )}
-                    </div>
-                    <div className="flex flex-col gap-3">
-                        <div className="w-full h-4 bg-bg-surface-hover rounded-full overflow-hidden">
-                            {isLoading ? (
-                                <div className="h-full w-full bg-border-subtle animate-pulse"></div>
-                            ) : (
-                                <div
-                                    className="h-full bg-accent-primary rounded-full relative shadow-[0_0_20px_var(--accent-primary)] opacity-90 transition-all duration-500"
-                                    style={{ width: `${stats ? Math.min((stats.dailyProgress / stats.dailyGoal) * 100, 100) : 0}%` }}
-                                ></div>
-                            )}
-                        </div>
-                        <div className="flex justify-between text-sm font-medium text-text-tertiary">
-                            {isLoading ? (
-                                <>
-                                    <div className="h-4 w-20 bg-bg-surface-hover rounded animate-pulse"></div>
-                                    <div className="h-4 w-20 bg-bg-surface-hover rounded animate-pulse"></div>
-                                </>
-                            ) : (
-                                <>
-                                    <span>{stats ? `${stats.dailyProgress} mins played` : '0 mins'}</span>
-                                    <span>Target: {stats ? `${stats.dailyGoal} mins` : '45 mins'}</span>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                </motion.div>
+                    </motion.div>
+                </Link>
 
                 {/* Total Practice */}
                 <motion.div
@@ -261,9 +263,6 @@ export default function DashboardPage() {
                     {/* Tuner Widget */}
                     {/* Tuner Widget */}
                     <TunerWidget />
-
-                    {/* Upcoming */}
-
 
                     {/* Pro Tip - Upgraded UI: Magic Card Effect with Gradient Border & Glow */}
                     {/* Pro Tip - Apple Style: Minimalist, clean, subtle */}
