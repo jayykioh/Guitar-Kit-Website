@@ -21,7 +21,7 @@ interface FlowingMenuProps {
 
 interface MenuItemProps extends MenuItemData {
     speed: number;
-    textColor: string;
+    textColor?: string; // Make optional to match parent
     marqueeBgColor: string;
     marqueeTextColor: string;
     borderColor: string;
