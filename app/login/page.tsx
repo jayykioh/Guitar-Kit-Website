@@ -39,7 +39,8 @@ export default function LoginPage() {
                 setError('Invalid email or password');
             } else {
                 console.log('[LOGIN CLIENT] Success! Redirecting to dashboard...')
-                router.push('/dashboard');
+                // Fix: Use window.location instead of router.push for reliable redirect
+                window.location.href = '/dashboard';
             }
         } catch (err) {
             console.error('[LOGIN CLIENT] Error:', err)

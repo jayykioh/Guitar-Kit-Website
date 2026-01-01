@@ -175,7 +175,7 @@ export default function LandingPage() {
                 <div className="max-w-[1400px] mx-auto">
 
 
-                    <div className="h-[500px] w-full relative border-t border-b border-white/10">
+                    <div className="h-[500px] w-full relative border-t border-b border-border-subtle">
                         <FlowingMenu
                             items={[
                                 { link: '#eq', text: 'Signal Analysis', image: 'https://picsum.photos/600/400?grayscale' },
@@ -184,7 +184,6 @@ export default function LandingPage() {
                                 { link: '#tuner', text: 'Precision Tuner', image: 'https://picsum.photos/600/400?grayscale&blur=1' }
                             ]}
                             bgColor="transparent"
-                            textColor="#ffffff"
                             marqueeBgColor="#10B981"
                             marqueeTextColor="#000000"
                         />
@@ -207,13 +206,13 @@ export default function LandingPage() {
                             initial={{ opacity: 0, y: 10 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.1 }}
-                            className="text-4xl md:text-5xl font-semibold tracking-tight text-white"
+                            className="text-4xl md:text-5xl font-semibold tracking-tight text-text-primary"
                         >
                             Legends, and more legends...
                         </motion.h3>
                     </div>
 
-                    <div className="min-h-[600px] w-full relative group">
+                    <div className="min-h-[600px] w-full relative group bg-bg-page">
                         <ChromaGrid
                             items={[
                                 { image: "/guitarist/JimiHendrix.jpg", title: "Jimi Hendrix", subtitle: "Psychedelic Rock", handle: "1942-1970", gradient: "linear-gradient(145deg, #7c3aed, #000)", borderColor: "#7c3aed" },

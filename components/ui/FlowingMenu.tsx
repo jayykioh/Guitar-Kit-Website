@@ -31,7 +31,7 @@ interface MenuItemProps extends MenuItemData {
 const FlowingMenu: React.FC<FlowingMenuProps> = ({
     items = [],
     speed = 15,
-    textColor = '#ffffff',
+    textColor, // Will use CSS variable if not provided
     bgColor = 'transparent',
     marqueeBgColor = '#10B981', // accent-primary (emerald-500 equivalent)
     marqueeTextColor = '#000000',
@@ -157,11 +157,11 @@ const MenuItem: React.FC<MenuItemProps> = ({
             style={{ borderTop: isFirst ? 'none' : `1px solid ${borderColor}` }}
         >
             <a
-                className="flex items-center justify-center h-full relative cursor-pointer uppercase no-underline font-semibold text-[10vh] md:text-[8vh] leading-[0.9] tracking-tighter"
+                className="flex items-center justify-center h-full relative cursor-pointer uppercase no-underline font-semibold text-[10vh] md:text-[8vh] leading-[0.9] tracking-tighter text-text-primary"
                 href={link}
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
-                style={{ color: textColor }}
+                style={textColor ? { color: textColor } : undefined}
             >
                 {text}
             </a>
