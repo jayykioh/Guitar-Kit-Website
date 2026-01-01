@@ -321,15 +321,17 @@ function PracticePageContent() {
                                 )}
 
                                 {/* FOCUS MODE HINT (Top Right) */}
-                                <div className="hidden md:flex flex-col items-end gap-1">
+                                <div className="flex flex-col items-end gap-1">
                                     <button
                                         onClick={() => {
                                             logToTerminal('[PracticePage] Button Click: Focus Mode ON');
                                             setIsFocusMode(true);
                                         }}
                                         className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-bg-surface border border-border-subtle hover:border-accent-primary hover:text-accent-primary transition-colors group/hint"
+                                        aria-label="Enter Focus Mode"
                                     >
-                                        <span className="text-xs font-medium text-text-secondary group-hover/hint:text-text-primary">Focus Mode</span>
+                                        <span className="material-symbols-outlined text-lg md:hidden">center_focus_weak</span>
+                                        <span className="text-xs font-medium text-text-secondary group-hover/hint:text-text-primary hidden md:inline">Focus Mode</span>
                                         <kbd className="hidden sm:inline-flex h-5 items-center gap-1 rounded border border-border-subtle bg-bg-page px-1.5 font-mono text-[10px] font-medium text-text-tertiary">
                                             F
                                         </kbd>

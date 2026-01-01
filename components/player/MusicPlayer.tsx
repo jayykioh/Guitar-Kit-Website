@@ -314,10 +314,10 @@ export default function MusicPlayer({ activeSong, onInteraction, onTrackSelect, 
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.9, opacity: 0, y: 20 }}
                             transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                            className="flex items-start gap-6 h-[640px] z-10 max-w-[1000px] w-full justify-center px-4 relative"
+                            className="flex flex-col md:flex-row items-center md:items-start gap-6 h-full md:h-[640px] z-10 max-w-[1000px] w-full justify-center px-4 relative pt-20 md:pt-0 overflow-y-auto md:overflow-visible"
                         >
                             {/* 1. LEFT CARD: PLAYER */}
-                            <div className={`relative w-[420px] ${styles.glassCard} rounded-[2.5rem] p-8 flex flex-col justify-between h-full shrink-0`}>
+                            <div className={`relative w-full md:w-[420px] ${styles.glassCard} rounded-[2.5rem] p-8 flex flex-col justify-between min-h-[500px] md:h-full shrink-0 mb-6 md:mb-0`}>
 
                                 {/* Header */}
                                 <div className="flex justify-between items-center text-white/50 shrink-0">
@@ -492,9 +492,9 @@ export default function MusicPlayer({ activeSong, onInteraction, onTrackSelect, 
                                 {showPlaylist && (
                                     <motion.div
                                         initial={{ width: 0, opacity: 0, x: -20 }}
-                                        animate={{ width: 360, opacity: 1, x: 0 }}
+                                        animate={{ width: typeof window !== 'undefined' && window.innerWidth < 768 ? '100%' : 360, opacity: 1, x: 0 }}
                                         exit={{ width: 0, opacity: 0, x: -20 }}
-                                        className={`relative h-full ${styles.glassCard} rounded-[2.5rem] flex flex-col overflow-hidden shrink-0`}
+                                        className={`relative h-[500px] md:h-full w-full md:w-[360px] ${styles.glassCard} rounded-[2.5rem] flex flex-col overflow-hidden shrink-0`}
                                     >
                                         {/* Library Header */}
                                         <div className="p-6 pb-2 shrink-0 bg-gradient-to-b from-black/20 to-transparent">

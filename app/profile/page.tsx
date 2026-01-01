@@ -127,7 +127,7 @@ export default function ProfilePage() {
         <main className="min-h-screen bg-bg-page pt-24 pb-12 px-4 md:px-8 max-w-7xl mx-auto flex flex-col gap-12 font-sans">
 
             {/* Header / Hero Section - Apple Music Style */}
-            <header className="flex flex-col md:flex-row items-end gap-8 pb-8 border-b border-border-subtle/50">
+            <header className="flex flex-col md:flex-row items-start md:items-end gap-8 pb-8 border-b border-border-subtle/50">
                 {/* Avatar */}
                 <motion.div
                     initial={{ scale: 0.9, opacity: 0 }}
