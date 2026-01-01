@@ -78,18 +78,35 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     ],
     callbacks: {
         async jwt({ token, user, trigger, session }) {
+            console.log('[AUTH JWT] Trigger:', trigger)
+            console.log('[AUTH JWT] Has user:', !!user)
+            console.log('[AUTH JWT] Token before:', { email: token.email, id: token.id })
+
             if (user) {
                 token.id = user.id
+                console.log('[AUTH JWT] Added user.id to token:', user.id)
             }
             if (trigger === "update" && session?.name) {
                 token.name = session.name;
+                console.log('[AUTH JWT] Updated name:', session.name)
             }
+
+            console.log('[AUTH JWT] Token after:', { email: token.email, id: token.id })
             return token
         },
         async session({ session, token }) {
+            console.log('[AUTH SESSION] Building session')
+            console.log('[AUTH SESSION] Token:', { email: token.email, id: token.id })
+
             if (session.user) {
                 session.user.id = token.id as string
+                console.log('[AUTH SESSION] Added user.id:', session.user.id)
             }
+
+            console.log('[AUTH SESSION] Final session:', {
+                userEmail: session.user?.email,
+                userId: session.user?.id
+            })
             return session
         },
     },

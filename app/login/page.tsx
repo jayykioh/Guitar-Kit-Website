@@ -20,6 +20,8 @@ export default function LoginPage() {
         setError('');
         setIsLoading(true);
 
+        console.log('[LOGIN CLIENT] Starting credentials login:', email)
+
         try {
             const result = await signIn('credentials', {
                 email,
@@ -27,12 +29,20 @@ export default function LoginPage() {
                 redirect: false,
             });
 
+            console.log('[LOGIN CLIENT] Credentials result:', {
+                ok: result?.ok,
+                error: result?.error,
+                status: result?.status
+            })
+
             if (result?.error) {
                 setError('Invalid email or password');
             } else {
+                console.log('[LOGIN CLIENT] Success! Redirecting to dashboard...')
                 router.push('/dashboard');
             }
         } catch (err) {
+            console.error('[LOGIN CLIENT] Error:', err)
             setError('An error occurred. Please try again.');
         } finally {
             setIsLoading(false);
@@ -41,9 +51,11 @@ export default function LoginPage() {
 
     const handleGoogleSignIn = async () => {
         setIsLoading(true);
+        console.log('[LOGIN CLIENT] Starting Google OAuth flow')
         try {
             await signIn('google', { callbackUrl: '/dashboard' });
         } catch (err) {
+            console.error('[LOGIN CLIENT] Google error:', err)
             setError('Failed to sign in with Google');
             setIsLoading(false);
         }
