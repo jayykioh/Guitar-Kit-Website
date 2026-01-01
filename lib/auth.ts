@@ -12,6 +12,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         maxAge: 30 * 24 * 60 * 60, // 30 days
     },
     secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
+    trustHost: true, // Required for Vercel deployment
     providers: [
         // Google OAuth (optional - only enabled if credentials are provided)
         ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET

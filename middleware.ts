@@ -9,9 +9,10 @@ export async function middleware(req: NextRequest) {
     })
 
     const isLoggedIn = !!token
-    const isAuthPage = req.nextUrl.pathname.startsWith("/login")
+    const isAuthPage = req.nextUrl.pathname.startsWith("/login") || req.nextUrl.pathname.startsWith("/signup")
 
-    const protectedRoutes = ["/dashboard", "/songs", "/practice"]
+    // Only protect dashboard and profile - allow guest access to practice and songs
+    const protectedRoutes = ["/dashboard", "/profile"]
     const isProtectedRoute = protectedRoutes.some(route =>
         req.nextUrl.pathname.startsWith(route)
     )
@@ -28,5 +29,6 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-    matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+    // ✅ Exclude /api/auth BEFORE /api to prevent middleware blocking NextAuth
+    matcher: ["/((?!api/auth|api|_next|favicon.ico).*)"],
 }
